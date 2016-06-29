@@ -10,12 +10,12 @@ run_dir = "."
 spp_dir = "$HOME/dpdk-home/spp/examples/multi_process/patch_panel"
 qemu_dir = "$HOME/dpdk-home/qemu-setup/runscript"
 
-spp_pri_port = 15555
-spp_sec_port = 16666
+spp_pri_port = 5555
+spp_sec_port = 6666
 
 secondaries = [
-        {"id": "sec1", "coremask": "0x06"},
-        {"id": "sec2", "coremask": "0x0A"},
+        {"id": "1", "coremask": "0x06"},
+        {"id": "2", "coremask": "0x0A"},
         ]
 
 monitor_port = "4444"

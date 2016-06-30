@@ -36,7 +36,7 @@ windows = [
    {
     "win_name": "pri",
     "dir": run_dir,
-    "cmd": "sudo -b sh runscripts/primary.sh",
+    "cmd": "sh runscripts/primary.sh",
     "opts": "%s" % spp_pri_port,
     "enter": True
     },
@@ -44,7 +44,7 @@ windows = [
    {
     "win_name": "sec1",
     "dir": run_dir,
-    "cmd": "sudo -b sh runscripts/secondary.sh",
+    "cmd": "sh runscripts/secondary.sh",
     "opts": "%s %s %s" % (secondaries[0].get("id"), secondaries[0].get("coremask"), spp_sec_port),
     "enter": True
     },
@@ -52,7 +52,7 @@ windows = [
    {
     "win_name": "sec2",
     "dir": run_dir,
-    "cmd": "sudo -b sh runscripts/secondary.sh",
+    "cmd": "sh runscripts/secondary.sh",
     "opts": "%s %s %s" % (secondaries[1].get("id"), secondaries[1].get("coremask"), spp_sec_port),
     "enter": True
     },

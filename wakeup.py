@@ -8,7 +8,7 @@ import os
 # params
 run_dir = "."
 spp_dir = "$HOME/dpdk-home/spp/examples/multi_process/patch_panel"
-qemu_dir = "$HOME/dpdk-home/qemu-setup/runscript"
+qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
 
 spp_pri_port = 5555
 spp_sec_port = 6666

@@ -2,7 +2,7 @@
 
 PRI_PORT=$1
 SPPDIR=$HOME/dpdk-home/spp/examples/multi_process/patch_panel
-NUM_RINGS=8
+NUM_RINGS=10
 
 #echo sudo -b -E $SPPDIR/primary/primary/x86_64-ivshmem-linuxapp-gcc/spp_primary \
 #  -c 0x02 -n 4 --socket-mem 1024 \

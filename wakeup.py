@@ -7,7 +7,7 @@ import os
 
 # params
 run_dir = "."
-spp_dir = "$HOME/dpdk-home/spp/examples/multi_process/patch_panel"
+spp_dir = "$HOME/dpdk-home/spp/src"
 qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
 
 spp_pri_port = 5555
@@ -37,7 +37,7 @@ windows = [
     "win_name": "pri",
     "dir": run_dir,
     "cmd": "sh runscripts/primary.sh",
-    "opts": "%s" % spp_pri_port,
+    "opts": "%s %s" % (spp_dir, spp_pri_port),
     "enter": True
     },
 
@@ -45,7 +45,7 @@ windows = [
     "win_name": "sec1",
     "dir": run_dir,
     "cmd": "sh runscripts/secondary.sh",
-    "opts": "%s %s %s" % (secondaries[0].get("id"), secondaries[0].get("coremask"), spp_sec_port),
+    "opts": "%s %s %s %s" % (spp_dir, secondaries[0].get("id"), secondaries[0].get("coremask"), spp_sec_port),
     "enter": True
     },
 
@@ -53,7 +53,7 @@ windows = [
     "win_name": "sec2",
     "dir": run_dir,
     "cmd": "sh runscripts/secondary.sh",
-    "opts": "%s %s %s" % (secondaries[1].get("id"), secondaries[1].get("coremask"), spp_sec_port),
+    "opts": "%s %s %s %s" % (spp_dir, secondaries[1].get("id"), secondaries[1].get("coremask"), spp_sec_port),
     "enter": True
     },
 

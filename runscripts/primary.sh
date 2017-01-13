@@ -1,7 +1,7 @@
 #!/bin/sh 
 
-PRI_PORT=$1
-SPPDIR=$HOME/dpdk-home/spp/examples/multi_process/patch_panel
+SPPDIR=$1
+PRI_PORT=$2
 NUM_RINGS=10
 
 #echo sudo -b -E $SPPDIR/primary/primary/x86_64-ivshmem-linuxapp-gcc/spp_primary \

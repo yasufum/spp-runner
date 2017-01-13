@@ -1,10 +1,9 @@
 #!/bin/sh
 
-CLIENT_ID=$1
-COREMASK=$2
-SEC_PORT=$3
-
-SPPDIR=$HOME/dpdk-home/spp/examples/multi_process/patch_panel
+SPPDIR=$1
+CLIENT_ID=$2
+COREMASK=$3
+SEC_PORT=$4
 
 #echo sudo -b -E $SPPDIR/nfv/nfv/x86_64-ivshmem-linuxapp-gcc/app/spp_nfv \
 #  -c ${COREMASK} -n 4 --proc-type=secondary \

@@ -10,8 +10,8 @@ run_dir = "."
 spp_dir = "$HOME/dpdk-home/spp/src"
 qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
 
-spp_pri_port = 5555
-spp_sec_port = 6666
+ctrl_pri_port = 5555
+ctrl_sec_port = 6666
 
 secondaries = [
         {"id": "1", "coremask": "0x06"},
@@ -29,7 +29,7 @@ windows = [
     "win_name": "ctrler",
     "dir": spp_dir,
     "cmd": "python spp.py",
-    "opts": "-p %s -s %s" % (spp_pri_port, spp_sec_port),
+    "opts": "-p %s -s %s" % (ctrl_pri_port, ctrl_sec_port),
     "enter": True
     },
 
@@ -37,7 +37,7 @@ windows = [
     "win_name": "pri",
     "dir": run_dir,
     "cmd": "sh runscripts/primary.sh",
-    "opts": "%s %s" % (spp_dir, spp_pri_port),
+    "opts": "%s %s %s" % (spp_dir, ctrl_host, ctrl_pri_port),
     "enter": True
     },
 
@@ -45,7 +45,7 @@ windows = [
     "win_name": "sec1",
     "dir": run_dir,
     "cmd": "sh runscripts/secondary.sh",
-    "opts": "%s %s %s %s" % (spp_dir, secondaries[0].get("id"), secondaries[0].get("coremask"), spp_sec_port),
+    "opts": "%s %s %s %s %s" % (spp_dir, secondaries[0].get("id"), secondaries[0].get("coremask"), ctrl_host, ctrl_sec_port),
     "enter": True
     },
 
@@ -53,7 +53,7 @@ windows = [
     "win_name": "sec2",
     "dir": run_dir,
     "cmd": "sh runscripts/secondary.sh",
-    "opts": "%s %s %s %s" % (spp_dir, secondaries[1].get("id"), secondaries[1].get("coremask"), spp_sec_port),
+    "opts": "%s %s %s %s %s" % (spp_dir, secondaries[1].get("id"), secondaries[1].get("coremask"), ctrl_host, ctrl_sec_port),
     "enter": True
     },
 

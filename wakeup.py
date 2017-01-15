@@ -10,6 +10,7 @@ run_dir = "."
 spp_dir = "$HOME/dpdk-home/spp/src"
 qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
 
+ctrl_host = "127.0.0.1"
 ctrl_pri_port = 5555
 ctrl_sec_port = 6666
 

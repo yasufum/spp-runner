@@ -8,6 +8,7 @@ import sys
 
 # params
 sess_name = "spp"
+default_nof_sec = 2
 run_dir = "."
 spp_srcdir = "$HOME/dpdk-home/spp/src"
 qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
@@ -19,14 +20,15 @@ ctrler = {
         "sec_port": 6666
         }
 
-# spp primary
+# spp primary (2 cores per process)
 primary = {"coremask": "0x03"}
 
-# spp secondaries
+# spp secondaries (2 cores per process)
 secondaries = [
         {"id": 1, "coremask": "0x0C"},
         {"id": 2, "coremask": "0x30"},
         {"id": 3, "coremask": "0xC0"},
+        {"id": 4, "coremask": "0x300"}
         ]
 
 # ring VM
@@ -106,7 +108,7 @@ def main():
     if len(args) > 1:
         nof_sec = int(args[1])
     else:
-        nof_sec = len(secondaries)
+        nof_sec = default_nof_sec
 
     if nof_sec > len(secondaries):
         nof_sec = len(secondaries)

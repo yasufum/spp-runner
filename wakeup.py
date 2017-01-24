@@ -112,7 +112,7 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
     # working dir for login VMs
     windows.append({
         "win_name": "wdir",
-        "dir": run_dir,
+        "dir": qemu_dir,
         "cmd": "",
         "opts": "",
         "enter_key": False

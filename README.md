@@ -18,7 +18,9 @@ How to use
 #### 1. Directory structure
 
 This tool is assumed to use with other two tools,
-`qemu-setup` and `spp-vm-installer`.
+`qemu-setup` and `spp-vm-installer`(optional).
+Without `spp-vm-installer`, you have to install
+SPP your own.
 
 You have to put all tools in a directory before run it.
 
@@ -51,8 +53,87 @@ other types by editing `ring.sh` and `vhost.sh` in
 
 #### 3. Configuration
 
+Configuration is described in `conf.yml`.
+
+It's divided into five parts which respond to each of
+SPP entities as following.
+
+##### 3-1. SPP controller
+
+SPP controller config has three attributes.
+
+  - host: IP address of controller node
+  - pri_port: Port SPP primary process connects to (should not change)
+  - sec_port: Port SPP secondary processes connect to (should not change)
+
+##### 3-2. SPP primary 
+
+SPP primary config has one attribute.
+
+  - coremask: CPU cores SPP primary uses
+
+You must avoid to overlap with secondary processes.
+So, confirm not to overlap with them if you change it.
+
+You can monitor statistics if you assign two or more.
+It requires at least one core and monitoring is disabled
+in this case.
+
+
+##### 3-3. SPP secondary
+
+SPP secondary config has two attributes.
+
+  - id: secondary ID
+  - coremask: CPU cores SPP secondary uses
+
+id attr responds to secondary ID and it's given to
+`runscripts/secondary.sh` to use it as a option for
+running secondary process.
+
+##### 3-4. VM(ring)
+
+VM(ring) config has one attribute.
+
+  - id: VM ID respond to secondary ID running on the VM
+
+##### 3-5. VM(vhost)
+
+VM(vhost) config has one attribute.
+
+  - id: VM ID respond to secondary ID running on the VM
+
+
 #### 4. Generate templates for ring and vhost VMs
 
-VMs are booted from `wakeup.py`
+VMs are booted from `wakeup.py`.
+But you have to confirm that you have already prepared 
+tempaltes before running VMs.
 
-##### 3-1. 
+##### 4-1. Understand how to manage images
+
+There are two steps for running VMs.
+First, you generate templates for ring and vhost from
+base template.
+Generated ring template is named by adding prefix "or" to
+base template.
+It's similar for vhost template but prefix is "ov".
+Then, generate images for each of VMs as instances from
+ring or vhost template. This instance images are put into
+`qemu-setup/runscripts/img/`.
+
+As you run `wakeup.py`, it tries to boot VMs using image in
+`qemu-setup/runscripts/img/`.
+If there is no image in the `img` directory, then `wakeup.py`
+tries to generate instance from ring or vhost template.
+In the same manner, ring and vhost templates are generated
+from base template if they don't exist.
+
+Therefore, you have to put only base template image at first time.
+
+##### 4-2. Setup ring and vhost templates
+
+Before running `wakeup.py`, you must put base template
+into `qemu-setup/runscripts/` and make sure that other
+other templates don't exist.
+

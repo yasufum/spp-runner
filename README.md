@@ -29,8 +29,7 @@ $ ./wakeup.py
 ```
 
 This script uses [tmux](https://tmux.github.io/) for managing each of
-processes in their window.
-Last one is for opening working directory in which you access to VMs.
+processes in it own window.
 
   1. SPP controller
   1. SPP primary
@@ -38,6 +37,9 @@ Last one is for opening working directory in which you access to VMs.
   1. ring VM
   1. vhost VM
   1. working dir
+
+The last one is for a working directory in which you manage VMs.
+You need more than one working window if you use two or more VMs.
 
 The number of windows of ring and vhost VMs depends on how many you
 run VMs.
@@ -184,6 +186,25 @@ Therefore, you have to put only base template image at first time.
 ##### 4-2. Setup ring and vhost templates
 
 Before running `wakeup.py`, you must put base template
-into `qemu-setup/runscripts/` and make sure that other
+into `qemu-setup/runscripts/` and make sure that
 other templates don't exist.
+
+Run `wakeup.py` with default options.
+
+  ```sh
+  $ ./wakeup.py
+  ```
+
+Six tmux's windows appear in your terminal and last window is focused.
+In primary, secondaries and VMs window, command is prompted for input
+password
+(SPP controller doesn't require sudo).
+
+As described in SPP's documents, you have to run processes in order.
+
+  1. SPP controller
+  2. primary
+  3. seconrdaries and ring VM
+  4. vhost VM (after create socket)
+
 

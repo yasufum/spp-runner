@@ -12,6 +12,56 @@ SPP is implemented mainly on Intel DPDK and
 provides two interfaces for VMs, ring(ivshmem) and vhost.
 
 
+Usage
+=====
+
+#### 1. Run SPP and VMs
+
+`wakeup.py` is a script for runnig SPP primary, secondaries and VMs.
+
+You can run two secondaries, one ring VM and one vhost VM as following.
+
+```sh
+$ ./wakeup.py -ns 2 -nr 1 -nv 1
+
+# This options is defined as default value. It's also the same.
+$ ./wakeup.py
+```
+
+This script uses [tmux](https://tmux.github.io/) for managing each of
+processes in their window.
+Last one is for opening working directory in which you access to VMs.
+
+  1. SPP controller
+  1. SPP primary
+  1. SPP secondaries
+  1. ring VM
+  1. vhost VM
+  1. working dir
+
+The number of windows of ring and vhost VMs depends on how many you
+run VMs.
+For instance, three windows of ring VMs are opened if you run three ring VMs.
+
+Details are refered with help.
+
+  ```sh
+  $ ./wakeup.py -h
+  usage: wakeup.py [-h] [-ns NOF_SEC] [-nr NOF_RING] [-nv NOF_VHOST]
+  
+  Run SPP and VMs
+  
+  optional arguments:
+    -h, --help            show this help message and exit
+    -ns NOF_SEC, --nof-sec NOF_SEC
+                          Number of SPP secondaries
+    -nr NOF_RING, --nof-ring NOF_RING
+                          Number of VMs running ring
+    -nv NOF_VHOST, --nof-vhost NOF_VHOST
+                          Number of VMs running vhost
+  ```
+
+
 How to use
 ==========
 
@@ -20,7 +70,7 @@ How to use
 This tool is assumed to use with other two tools,
 `qemu-setup` and `spp-vm-installer`(optional).
 Without `spp-vm-installer`, you have to install
-SPP your own.
+SPP by your own.
 
 You have to put all tools in a directory before run it.
 

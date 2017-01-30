@@ -31,10 +31,18 @@ def main():
     y = yaml.load(f)
     f.close()
 
+    if len(y) == 0:
+        print("No VMs running...")
+        exit()
+
     if args.hostname == None or args.list == True: # show entries
         i = 0
         for ent in y:
-            print("id:%s, host:%s, ipaddr:%s" % (i, ent["hostname"], ent["ip-address"]))
+            if ent.has_key("hostname") == True:
+                hn = ent["hostname"]
+            else:
+                hn = ""
+            print("id:%s, host:%s, ipaddr:%s" % (i, hn, ent["ip-address"]))
             i += 1
         exit()
     elif args.update != None:
@@ -65,10 +73,17 @@ def main():
             "reboot"])
 
     for i in range(0, len(y)):
-        if (y[i]["hostname"] == args.hostname) or re.match(str(i), args.hostname):
+        if y[i].has_key("hostname") == True:
+            hn = y[i]["hostname"]
+        else:
+            hn = ""
+
+        if (hn == args.hostname) or re.match(str(i), args.hostname):
             subprocess.call(["ssh", y[i]["ip-address"]])
+            exit()
 
     print("No such hostname: '%s'" % args.hostname)
+
 
 if __name__ == '__main__':
     main()

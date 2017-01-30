@@ -11,12 +11,13 @@ import yaml
 # params
 sess_name = "spp"
 default_nof_sec = 2
-run_dir = "."
-spp_srcdir = "$HOME/dpdk-home/spp/src"
+home_dir = os.environ["HOME"]
+spp_srcdir = "%s/dpdk-home/spp/src" % home_dir
 qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
+work_dir = os.path.dirname(__file__) + "/.."
 
 # Load config
-f = open("conf.yml", "r")
+f = open(work_dir + "/conf.yml", "r")
 y = yaml.load(f)
 f.close
 
@@ -68,7 +69,7 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
             # spp primary
             {
                 "win_name": "pri",
-                "dir": run_dir,
+                "dir": work_dir,
                 "cmd": "sh runscripts/primary.sh",
                 "opts": "%s %s %s %s" % (
                     spp_srcdir, primary["coremask"],
@@ -79,13 +80,11 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
             ]
 
     # spp secondaries
-    home_dir = os.environ["HOME"]
-    spp_dir = "%s/dpdk-home/spp/src" % home_dir
     windows.append({
         "win_name": "sec",
-        "dir": run_dir,
+        "dir": work_dir,
         "cmd": "sudo python runscripts/secondaries.py",
-        "opts": "--num %s --sppdir %s" % (nof_sec, spp_dir),
+        "opts": "--num %s --sppdir %s" % (nof_sec, spp_srcdir),
         "enter_key": True
         })
 
@@ -112,7 +111,7 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
     # working dir for login VMs
     windows.append({
         "win_name": "wdir",
-        "dir": qemu_dir,
+        "dir": work_dir,
         "cmd": "",
         "opts": "",
         "enter_key": False

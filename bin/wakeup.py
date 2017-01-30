@@ -14,6 +14,7 @@ default_nof_sec = 2
 home_dir = os.environ["HOME"]
 spp_srcdir = "%s/dpdk-home/spp/src" % home_dir
 qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
+run_script = "run-vm.py"
 work_dir = os.path.dirname(__file__) + "/.."
 
 # Load config
@@ -31,14 +32,17 @@ primary = y["primary"]
 secondaries = y["secondaries"]
 
 # ring VM
-ring_sh = "ring.sh"
 vms_ring = y["vms_ring"]
 
 # vhost VM
-vhost_sh = "vhost.sh"
 vms_vhost = y["vms_vhost"]
 
 parser = argparse.ArgumentParser(description="Run SPP and VMs")
+parser.add_argument(
+        "boot",
+        nargs="?",
+        type=str,
+        help="Boot image file")
 parser.add_argument(
         "-ns", "--nof-sec",
         type=int, default=2,
@@ -47,7 +51,8 @@ parser.add_argument(
         "-nr", "--nof-ring",
         type=int, default=1,
         help="Number of VMs running ring")
-parser.add_argument("-nv", "--nof-vhost",
+parser.add_argument(
+        "-nv", "--nof-vhost",
         type=int, default=1,
         help="Number of VMs running vhost")
 args = parser.parse_args()
@@ -89,24 +94,42 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
         })
 
     # VM - ring
-    for i in range(nof_ring):
-        windows.append({
-            "win_name": "vm_r%s" % i,
-            "dir": qemu_dir,
-            "cmd": "./%s" % ring_sh,
-            "opts": "%s" % vms_ring[i]["id"],
-            "enter_key": True
-            })
+    if args.boot == "template":
+       windows.append({
+           "win_name": "vm_r%s" % 0,
+           "dir": qemu_dir,
+           "cmd": "./%s" % run_script,
+           "opts": "-t ring -i %s" % 0,
+           "enter_key": True
+           })
+    else:
+        for i in range(nof_ring):
+            windows.append({
+                "win_name": "vm_r%s" % i,
+                "dir": qemu_dir,
+                "cmd": "./%s" % run_script,
+                "opts": "-t ring -i %s" % vms_ring[i]["id"],
+                "enter_key": True
+                })
 
     # VM - vhost
-    for i in range(nof_vhost):
+    if args.boot == "template":
         windows.append({
-            "win_name": "vm_v%s" % i,
+            "win_name": "vm_v%s" % 0,
             "dir": qemu_dir,
-            "cmd": "./%s" % vhost_sh,
-            "opts": "%s" % vms_vhost[i]["id"],
+            "cmd": "./%s" % run_script,
+            "opts": "-t vhost -i %s" % 0,
             "enter_key": True
             })
+    else:
+        for i in range(nof_vhost):
+            windows.append({
+                "win_name": "vm_v%s" % i,
+                "dir": qemu_dir,
+                "cmd": "./%s" % run_script,
+                "opts": "-t vhost -i %s" % vms_vhost[i]["id"],
+                "enter_key": True
+                })
             
     # working dir for login VMs
     windows.append({

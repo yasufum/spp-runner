@@ -1,15 +1,19 @@
 What is this?
 =============
 
-Management tool for SPP and VMs.
+A management tool for SPP and VMs for Service Function Chaining (SFC).
 
 
 #### SPP
 
 [SPP](http://www.dpdk.org/browse/apps/spp/)
-is a kind of Inter-VM communication technology.
-SPP is implemented mainly on Intel DPDK and
-provides two interfaces for VMs, ring(ivshmem) and vhost.
+is a kind of Inter-VM communication technology
+which is implemented on Intel DPDK.
+You can configure network path between applications on host and guest VMs
+with SPP.
+
+SPP provides not only high-performance connectivity, but flexibility
+with patch panel like interface.
 
 
 Usage
@@ -17,19 +21,25 @@ Usage
 
 #### 1. Run SPP and VMs
 
-`wakeup.py` is a script for runnig SPP primary, secondaries and VMs.
+You start from running `bin/wakeup.py` which is a script for preparing
+environment on your terminal.
+This script opens several windows with [tmux](https://tmux.github.io/)
+for SPP primary process,
+secondary processes and VMs. So, you need to install `tmux`
+before run the script.
 
-You can run two secondaries, one ring VM and one vhost VM as following.
+`bin/wakeup.py` takes arguments for the number of secondary processes and VMs
+and give them to each of their runscripts.
+For instance, you can run two secondaries, one ring VM and one vhost VM as following.
 
 ```sh
-$ ./wakeup.py -ns 2 -nr 1 -nv 1
+$ ./bin/wakeup.py -ns 2 -nr 1 -nv 1
 
 # This options is defined as default value. It's also the same.
-$ ./wakeup.py
+$ ./bin/wakeup.py
 ```
 
-This script uses [tmux](https://tmux.github.io/) for managing each of
-processes in it own window.
+You see following five windows.
 
   1. SPP controller
   1. SPP primary
@@ -38,14 +48,9 @@ processes in it own window.
   1. vhost VM
   1. working dir
 
-The last one is for a working directory in which you manage VMs.
-You need more than one working window if you use two or more VMs.
+The last one is for a working directory to manage VMs.
 
-The number of windows of ring and vhost VMs depends on how many you
-run VMs.
-For instance, three windows of ring VMs are opened if you run three ring VMs.
-
-Details are refered with help.
+Refer help and `How to use` section for details..
 
   ```sh
   $ ./wakeup.py -h
@@ -107,8 +112,8 @@ other types by editing `ring.sh` and `vhost.sh` in
 
 Configuration is described in `conf.yml`.
 
-It's divided into five parts which respond to each of
-SPP entities as following.
+It's divided into five parts each of which responds to
+entity as following.
 
 ##### 3-1. SPP controller
 
@@ -192,7 +197,7 @@ other templates don't exist.
 Run `wakeup.py` with default options.
 
   ```sh
-  $ ./wakeup.py
+  $ ./bin/wakeup.py
   ```
 
 Six tmux's windows appear in your terminal and last window is focused.

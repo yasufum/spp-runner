@@ -12,7 +12,7 @@ which is implemented on Intel DPDK.
 You can configure network path between applications on host and guest VMs
 with SPP.
 
-SPP provides not only high-performance connectivity, but flexibility
+SPP provides not only high-performance connectivity, but also flexibility
 with patch panel like interface.
 
 
@@ -104,8 +104,7 @@ I have tested only `ubuntu16.04-server-amd64`, so
 it's recommended.
 
 [NOTE] Default type of image is `qcow2`, but you can use
-other types by editing `ring.sh` and `vhost.sh` in
-`qemu-setup/runscripts`.
+other types by editing `run-vm.py` in `qemu-setup/runscripts`.
 
 
 #### 3. Configuration
@@ -117,15 +116,11 @@ entity as following.
 
 ##### 3-1. SPP controller
 
-SPP controller config has three attributes.
-
   - host: IP address of controller node
   - pri_port: Port SPP primary process connects to (should not change)
   - sec_port: Port SPP secondary processes connect to (should not change)
 
 ##### 3-2. SPP primary 
-
-SPP primary config has one attribute.
 
   - coremask: CPU cores SPP primary uses
 
@@ -139,8 +134,6 @@ in this case.
 
 ##### 3-3. SPP secondary
 
-SPP secondary config has two attributes.
-
   - id: secondary ID
   - coremask: CPU cores SPP secondary uses
 
@@ -150,13 +143,9 @@ running secondary process.
 
 ##### 3-4. VM(ring)
 
-VM(ring) config has one attribute.
-
   - id: VM ID respond to secondary ID running on the VM
 
 ##### 3-5. VM(vhost)
-
-VM(vhost) config has one attribute.
 
   - id: VM ID respond to secondary ID running on the VM
 
@@ -194,7 +183,7 @@ Before running `wakeup.py`, you must put base template
 into `qemu-setup/runscripts/` and make sure that
 other templates don't exist.
 
-Run `wakeup.py` with default options.
+Run `wakeup.py`.
 
   ```sh
   $ ./bin/wakeup.py

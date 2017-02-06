@@ -25,10 +25,10 @@ f.close
 # spp controller
 ctrler = y["controller"]
 
-# spp primary (2 cores per process)
+# spp primary
 primary = y["primary"]
 
-# spp secondaries (2 cores per process)
+# spp secondaries
 secondaries = y["secondaries"]
 
 # ring VM
@@ -42,7 +42,7 @@ parser.add_argument(
         "boot",
         nargs="?",
         type=str,
-        help="Boot image file")
+        help="Specify 'template' if you boot VM with template")
 parser.add_argument(
         "-ns", "--nof-sec",
         type=int, default=2,
@@ -103,14 +103,18 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
            "enter_key": True
            })
     else:
-        for i in range(nof_ring):
-            windows.append({
-                "win_name": "vm_r%s" % i,
-                "dir": qemu_dir,
-                "cmd": "./%s" % run_script,
-                "opts": "-t ring -i %s" % vms_ring[i]["id"],
-                "enter_key": True
-                })
+        tmpary = []
+        for i in range(0, nof_ring):
+            tmpary.append(str(vms_ring[i]["id"]))
+        nof_ring_str = ",".join(tmpary)
+
+        windows.append({
+            "win_name": "vm_ring",
+            "dir": qemu_dir,
+            "cmd": "./%s" % run_script,
+            "opts": "-t ring -i %s" % nof_ring_str,
+            "enter_key": True
+            })
 
     # VM - vhost
     if args.boot == "template":
@@ -122,14 +126,17 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
             "enter_key": True
             })
     else:
-        for i in range(nof_vhost):
-            windows.append({
-                "win_name": "vm_v%s" % i,
-                "dir": qemu_dir,
-                "cmd": "./%s" % run_script,
-                "opts": "-t vhost -i %s" % vms_vhost[i]["id"],
-                "enter_key": True
-                })
+        tmpary = []
+        for i in range(0, nof_vhost):
+            tmpary.append(str(vms_vhost[i]["id"]))
+        nof_vhost_str = ",".join(tmpary)
+        windows.append({
+            "win_name": "vm_vhost",
+            "dir": qemu_dir,
+            "cmd": "./%s" % run_script,
+            "opts": "-t vhost -i %s" % nof_vhost_str,
+            "enter_key": True
+            })
             
     # working dir for login VMs
     windows.append({

@@ -23,6 +23,14 @@ parser.add_argument(
         "-u", "--update", 
         type=str,
         help="Update hostname by id or ipaddr")
+parser.add_argument(
+        "--shutdown", 
+        action="store_true",
+        help="Shutdown VM")
+parser.add_argument(
+        "--shutdown-all", 
+        action="store_true",
+        help="Shutdown all VMs")
 args = parser.parse_args()
 
 
@@ -35,7 +43,21 @@ def main():
         print("No VMs running...")
         exit()
 
-    if args.hostname == None or args.list == True: # show entries
+    
+    if args.shutdown_all == True:
+        for i in range(0, len(y)):
+            # Avoid error for empty hostname
+            subprocess.call([
+                "ssh",
+                "-t",
+                y[i]["ip-address"],
+                "sudo",
+                "shutdown",
+                "-h",
+                "now"])
+
+    # show entries
+    elif args.hostname == None or args.list == True:
         i = 0
         for ent in y:
             if ent.has_key("hostname") == True:
@@ -45,10 +67,12 @@ def main():
             print("id:%s, host:%s, ipaddr:%s" % (i, hn, ent["ip-address"]))
             i += 1
         exit()
+
+    # Update hostname
     elif args.update != None:
-        if re.match(r'^\d+\.\d+\.\d+\.\d+$', args.update):
+        if re.match(r'^\d+\.\d+\.\d+\.\d+$', args.update): # ipaddr
             h = args.update
-        elif re.match(r'^\d+$', args.update):
+        elif re.match(r'^\d+$', args.update): # or index number
             idx = int(args.update)
             if idx < len(y):
                 h = y[idx]["ip-address"]
@@ -72,17 +96,41 @@ def main():
             "sudo",
             "reboot"])
 
-    for i in range(0, len(y)):
-        if y[i].has_key("hostname") == True:
-            hn = y[i]["hostname"]
-        else:
-            hn = ""
+    # Shutdown VM
+    elif args.shutdown == True:
+        for i in range(0, len(y)):
+            # Avoid error for empty hostname
+            if y[i].has_key("hostname") == True:
+                hn = y[i]["hostname"]
+            else:
+                hn = ""
 
-        if (hn == args.hostname) or re.match(str(i), args.hostname):
-            subprocess.call(["ssh", y[i]["ip-address"]])
-            exit()
+            if (hn == args.hostname) or re.match(str(i), args.hostname):
+                subprocess.call([
+                    "ssh",
+                    "-t",
+                    y[i]["ip-address"],
+                    "sudo",
+                    "shutdown",
+                    "-h",
+                    "now"])
+                exit()
 
-    print("No such hostname: '%s'" % args.hostname)
+    # Login
+    else:
+        for i in range(0, len(y)):
+            # Avoid error for empty hostname
+            if y[i].has_key("hostname") == True:
+                hn = y[i]["hostname"]
+            else:
+                hn = ""
+
+            if (hn == args.hostname) or re.match(str(i), args.hostname):
+                subprocess.call(["ssh", y[i]["ip-address"]])
+                exit()
+
+        # hostname not found
+        print("No such hostname: '%s'" % args.hostname)
 
 
 if __name__ == '__main__':

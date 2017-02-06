@@ -19,8 +19,8 @@ secondaries:
     coremask: "0x300"  # 2 cores
   - id: 5
     coremask: "0xC00"  # 2 cores
-  - id: 6
-    coremask: "0x3000"  # 2 cores
+  #- id: 6
+  #- coremask: "0x3000"  # 2 cores
 
 vms_ring:
   - id: 6

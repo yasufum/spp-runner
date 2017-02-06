@@ -55,11 +55,15 @@ parser.add_argument(
         "-nv", "--nof-vhost",
         type=int, default=1,
         help="Number of VMs running vhost")
+parser.add_argument(
+        "-nw", "--nof-working",
+        type=int, default=1,
+        help="Number of working window")
 args = parser.parse_args()
 
 
 # return tmux windows
-def setup_windows(nof_sec, nof_ring, nof_vhost):
+def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
     windows = [
             # spp controller
             {
@@ -109,7 +113,7 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
         nof_ring_str = ",".join(tmpary)
 
         windows.append({
-            "win_name": "vm_ring",
+            "win_name": "vm_r",
             "dir": qemu_dir,
             "cmd": "./%s" % run_script,
             "opts": "-t ring -i %s" % nof_ring_str,
@@ -131,21 +135,22 @@ def setup_windows(nof_sec, nof_ring, nof_vhost):
             tmpary.append(str(vms_vhost[i]["id"]))
         nof_vhost_str = ",".join(tmpary)
         windows.append({
-            "win_name": "vm_vhost",
+            "win_name": "vm_v",
             "dir": qemu_dir,
             "cmd": "./%s" % run_script,
             "opts": "-t vhost -i %s" % nof_vhost_str,
             "enter_key": True
             })
             
-    # working dir for login VMs
-    windows.append({
-        "win_name": "wdir",
-        "dir": work_dir,
-        "cmd": "",
-        "opts": "",
-        "enter_key": False
-        })
+    # working windows
+    for i in range(0, nof_working):
+        windows.append({
+            "win_name": "w%d" % i,
+            "dir": work_dir,
+            "cmd": "",
+            "opts": "",
+            "enter_key": False
+            })
 
     return windows
 
@@ -174,9 +179,10 @@ def main():
     nof_sec = args.nof_sec
     nof_ring = args.nof_ring
     nof_vhost = args.nof_vhost
+    nof_working = args.nof_working
 
     cmd = []  # contains tmux commands
-    for w in setup_windows(nof_sec, nof_ring, nof_vhost):
+    for w in setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
         if len(cmd) == 0:
             new_sess = "tmux new-session -d -s %s -n %s -c %s" % (
                     sess_name,

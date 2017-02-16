@@ -39,10 +39,9 @@ vms_vhost = y["vms_vhost"]
 
 parser = argparse.ArgumentParser(description="Run SPP and VMs")
 parser.add_argument(
-        "boot",
-        nargs="?",
-        type=str,
-        help="Specify 'template' if you boot VM with template")
+        "-t", "--template",
+        action="store_true",
+        help="Boot template VM")
 parser.add_argument(
         "-ns", "--nof-sec",
         type=int, default=2,
@@ -59,6 +58,7 @@ parser.add_argument(
         "-nw", "--nof-working",
         type=int, default=1,
         help="Number of working window")
+
 args = parser.parse_args()
 
 
@@ -98,7 +98,7 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
         })
 
     # VM - ring
-    if args.boot == "template":
+    if args.template == True:
        windows.append({
            "win_name": "vm_r%s" % 0,
            "dir": qemu_dir,
@@ -121,7 +121,7 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
             })
 
     # VM - vhost
-    if args.boot == "template":
+    if args.template == True:
         windows.append({
             "win_name": "vm_v%s" % 0,
             "dir": qemu_dir,

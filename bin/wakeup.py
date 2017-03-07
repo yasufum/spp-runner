@@ -107,18 +107,19 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
            "enter_key": True
            })
     else:
-        tmpary = []
-        for i in range(0, nof_ring):
-            tmpary.append(str(vms_ring[i]["id"]))
-        nof_ring_str = ",".join(tmpary)
+        if nof_ring > 0:
+            tmpary = []
+            for i in range(0, nof_ring):
+                tmpary.append(str(vms_ring[i]["id"]))
+            nof_ring_str = ",".join(tmpary)
 
-        windows.append({
-            "win_name": "vm_r",
-            "dir": qemu_dir,
-            "cmd": "./%s" % run_script,
-            "opts": "-t ring -i %s" % nof_ring_str,
-            "enter_key": True
-            })
+            windows.append({
+                "win_name": "vm_r",
+                "dir": qemu_dir,
+                "cmd": "./%s" % run_script,
+                "opts": "-t ring -i %s" % nof_ring_str,
+                "enter_key": True
+                })
 
     # VM - vhost
     if args.template == True:
@@ -131,26 +132,32 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
             })
     else:
         tmpary = []
-        for i in range(0, nof_vhost):
-            tmpary.append(str(vms_vhost[i]["id"]))
-        nof_vhost_str = ",".join(tmpary)
-        windows.append({
-            "win_name": "vm_v",
-            "dir": qemu_dir,
-            "cmd": "./%s" % run_script,
-            "opts": "-t vhost -i %s" % nof_vhost_str,
-            "enter_key": True
-            })
+        if nof_vhost > 0:
+            for i in range(0, nof_vhost):
+                tmpary.append(str(vms_vhost[i]["id"]))
+
+            for vid in tmpary:
+                remove_sock(vid)
+
+            nof_vhost_str = ",".join(tmpary)
+            windows.append({
+                "win_name": "vm_v",
+                "dir": qemu_dir,
+                "cmd": "./%s" % run_script,
+                "opts": "-t vhost -i %s" % nof_vhost_str,
+                "enter_key": True
+                })
             
     # working windows
-    for i in range(0, nof_working):
-        windows.append({
-            "win_name": "w%d" % i,
-            "dir": work_dir,
-            "cmd": "",
-            "opts": "",
-            "enter_key": False
-            })
+    if nof_working > 0:
+        for i in range(0, nof_working):
+            windows.append({
+                "win_name": "w%d" % i,
+                "dir": work_dir,
+                "cmd": "",
+                "opts": "",
+                "enter_key": False
+                })
 
     return windows
 
@@ -173,6 +180,12 @@ def gen_send_keys(win_name, cmd, opts, enter_key):
         send_keys += " C-m"
 
     return send_keys
+
+
+# remove /tmp/sock* before run vhost VMs
+def remove_sock(sid):
+    cmd = "sudo rm -f /tmp/sock%s" % sid
+    os.system(cmd)
 
 
 def main():

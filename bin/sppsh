@@ -26,6 +26,12 @@ parser.add_argument(
         type=str,
         help="Update hostname of id or ipaddr")
 parser.add_argument(
+        "-r", "--run",
+        metavar=("ID|IPADDR", "HOSTNAME"),
+        nargs=2,
+        type=str,
+        help="Run secondary")
+parser.add_argument(
         "--shutdown", 
         action="store_true",
         help="Shutdown VM")
@@ -84,6 +90,19 @@ def main():
             str(h),
             "sudo",
             "reboot"])
+
+    # Run secondary process
+    elif args.run != None:
+        if re.match(r'^\d+\.\d+\.\d+\.\d+$', args.run[0]): # ipaddr
+            h = args.run[0]
+        elif re.match(r'^\d+$', args.run[0]): # or index number
+            idx = int(args.run[0])
+            if idx < len(y):
+                h = y[idx]["ip-address"]
+        else:
+            print("Invalid ipaddr or id!")
+            raise
+        print("hoge")
 
     # Shutdown VM
     elif args.shutdown == True:

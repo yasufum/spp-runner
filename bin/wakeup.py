@@ -55,6 +55,10 @@ parser.add_argument(
         type=int, default=1,
         help="Number of VMs running vhost")
 parser.add_argument(
+        "-vn", "--vhost-num",
+        type=int, default=1,
+        help="Number of vhost interfaces")
+parser.add_argument(
         "-nw", "--nof-working",
         type=int, default=1,
         help="Number of working window")
@@ -139,12 +143,13 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
             for vid in tmpary:
                 remove_sock(vid)
 
+            # nof_vhost is passed to run-vm.py as comma-separated values.
             nof_vhost_str = ",".join(tmpary)
             windows.append({
                 "win_name": "vm_v",
                 "dir": qemu_dir,
                 "cmd": "./%s" % run_script,
-                "opts": "-t vhost -i %s" % nof_vhost_str,
+                "opts": "-t vhost -i %s -vn %s" % (nof_vhost_str, args.vhost_num),
                 "enter_key": True
                 })
             

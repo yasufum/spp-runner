@@ -184,7 +184,7 @@ def gen_send_keys(win_name, cmd, opts, enter_key):
 
 # remove /tmp/sock* before run vhost VMs
 def remove_sock(sid):
-    cmd = "sudo rm -f /tmp/sock%s" % sid
+    cmd = "sudo rm -f /tmp/sock%s*" % sid
     os.system(cmd)
 
 

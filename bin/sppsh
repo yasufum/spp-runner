@@ -30,7 +30,7 @@ parser.add_argument(
         metavar=("ID|IPADDR", "HOSTNAME"),
         nargs=2,
         type=str,
-        help="Run secondary")
+        help="Run secondary process on the VM")
 parser.add_argument(
         "--shutdown", 
         action="store_true",
@@ -92,6 +92,7 @@ def main():
             "reboot"])
 
     # Run secondary process
+    # [TODO] secondaryプロセスの起動処理を書く
     elif args.run != None:
         if re.match(r'^\d+\.\d+\.\d+\.\d+$', args.run[0]): # ipaddr
             h = args.run[0]

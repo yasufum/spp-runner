@@ -3,6 +3,9 @@
 ## Table of Contents
 
 - [What is this](#what-is-this)
+- [System requirements](#system-requirements)
+- [Usage](#usage)
+
 
 ## What is this
 
@@ -16,25 +19,29 @@ is a kind of Inter-VM communication technology
 which is implemented using Intel DPDK.
 You can configure network path between applications on host and guest VMs
 with SPP.
-
 SPP provides not only high-performance connectivity, but also flexibility
 with patch panel like interface.
 
 
+## System requirements
+
+- python
+- tmux
+
+
 ## Usage
 
-### Run SPP and VMs
+First, update submodule `qemu-hda` and setup VMs as described in
+[Submodule](#submodule) section.
 
-You start from running `bin/wakeup.py` which is a script for preparing
-environment on your terminal.
+After setup VMs and install SPP on it, you can run SPP.
+
+### Run SPP
+
+You start by running `bin/wakeup.py` which is a script for launching SPP.
 This script opens several windows with [tmux](https://tmux.github.io/)
 for SPP primary process,
-secondary processes and VMs.
-Therefore, you need to install `tmux`
-before run the script.
-
-`bin/wakeup.py` takes arguments and passes them to runscripts.
-For instance, you can run two secondaries, one ring VM and one vhost VM as following.
+secondary processes and VMs on which SPP process runs.
 
 ```sh
 $ ./bin/wakeup.py -ns 2 -nr 1 -nv 1
@@ -43,18 +50,17 @@ $ ./bin/wakeup.py -ns 2 -nr 1 -nv 1
 $ ./bin/wakeup.py
 ```
 
-This command opens six windows with `tmux`.
+`wakeup.py` command opens several windows for each of processes as given
+arguments.
 
   1. SPP controller
   1. SPP primary
-  1. SPP secondaries
+  1. SPP secondaries on host
   1. ring VM
   1. vhost VM
   1. working dir
 
-The last one is for a working directory to manage VMs.
-
-Refer help and `How to use` section for details..
+Refer help for details.
 
   ```sh
   $ ./wakeup.py -h
@@ -81,19 +87,18 @@ Refer help and `How to use` section for details..
 
 ## How to use
 
-### Directory structure
+### Submodule
 
-This tool is assumed to use with other two tools,
-`qemu-setup` and `spp-vm-installer`(optional).
-Without `spp-vm-installer`, you have to install
-SPP by your own.
-
-You have to put all tools in a directory before run it.
+Clone submodule `qemu-hda` as following.
+This module is for creating HDA file and install OS on it.
+Please refer to [README](qemu-hda/README.md) for details.
 
 ```sh
-# check tools are placed in the same dir
-$ ls -aF
-qemu-setup/  spp-runner/  spp-vm-installer/ ...
+$ git submodule init
+Submodule 'qemu-hda' (https://github.com/yasufum/qemu-hda.git) registered for path 'qemu-hda'
+$ git submodule update
+Cloning into '/Users/ogawa/program/working/spp-runner/qemu-hda'...
+Submodule path 'qemu-hda': checked out '72a92e1fecdd794ddf593b3ef1cf210979b87491'
 ```
 
 ### Prepare VM image
@@ -227,7 +232,7 @@ from base template if they don't exist.
 
 Therefore, you have to put only base template image at first time.
 
-##### 4-2. Setup ring and vhost templates
+#### Setup ring and vhost templates
 
 Before running `wakeup.py`, you must put base template
 into `qemu-setup/runscripts/` and make sure that
@@ -250,5 +255,3 @@ As described in SPP's documents, you have to run processes in order.
   2. primary
   3. seconrdaries and ring VM
   4. vhost VM (after create socket)
-
-

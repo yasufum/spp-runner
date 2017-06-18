@@ -1,14 +1,19 @@
-What is this?
-=============
+# SPP Runner
 
-A management tool for SPP and VMs for Service Function Chaining (SFC).
+## Table of Contents
+
+- [What is this](#what-is-this)
+
+## What is this
+
+A management tool for SPP.
 
 
-#### SPP
+### SPP
 
 [SPP](http://www.dpdk.org/browse/apps/spp/)
 is a kind of Inter-VM communication technology
-which is implemented on Intel DPDK.
+which is implemented using Intel DPDK.
 You can configure network path between applications on host and guest VMs
 with SPP.
 
@@ -16,10 +21,9 @@ SPP provides not only high-performance connectivity, but also flexibility
 with patch panel like interface.
 
 
-Usage
-=====
+## Usage
 
-#### 1. Run SPP and VMs
+### Run SPP and VMs
 
 You start from running `bin/wakeup.py` which is a script for preparing
 environment on your terminal.
@@ -75,10 +79,9 @@ Refer help and `How to use` section for details..
   ```
 
 
-How to use
-==========
+## How to use
 
-#### 1. Directory structure
+### Directory structure
 
 This tool is assumed to use with other two tools,
 `qemu-setup` and `spp-vm-installer`(optional).
@@ -93,7 +96,7 @@ $ ls -aF
 qemu-setup/  spp-runner/  spp-vm-installer/ ...
 ```
 
-#### 2. Prepare VM image
+### Prepare VM image
 
 First, you need to prepare an image as base template,
 "base" means that there are other two templates for
@@ -113,7 +116,7 @@ it's recommended.
 other types by editing `run-vm.py` in `qemu-setup/runscripts`.
 
 
-#### 3. Configuration
+### Configuration
 
 Configuration is described in `conf.yml`.
 Basically, you don't need to edit without change core assignment.
@@ -161,13 +164,13 @@ Basically, you don't need to edit without change core assignment.
 It's divided into five parts each of which responds to
 entity as following.
 
-##### 3-1. SPP controller
+#### SPP controller
 
   - host: IP address of controller node
   - pri_port: Port SPP primary process connects to (should not change)
   - sec_port: Port SPP secondary processes connect to (should not change)
 
-##### 3-2. SPP primary 
+#### SPP primary 
 
   - coremask: CPU cores SPP primary uses
 
@@ -179,7 +182,7 @@ It requires at least one core and monitoring is disabled
 in this case.
 
 
-##### 3-3. SPP secondary
+#### SPP secondary
 
   - id: secondary ID
   - coremask: CPU cores SPP secondary uses
@@ -188,22 +191,22 @@ id attr responds to secondary ID and it's given to
 `runscripts/secondary.sh` to use it as a option for
 running secondary process.
 
-##### 3-4. VM(ring)
+#### VM(ring)
 
   - id: VM ID respond to secondary ID running on the VM
 
-##### 3-5. VM(vhost)
+#### VM(vhost)
 
   - id: VM ID respond to secondary ID running on the VM
 
 
-#### 4. Generate templates for ring and vhost VMs
+### Generate templates for ring and vhost VMs
 
 VMs are booted from `wakeup.py`.
 But you have to confirm that you have already prepared 
 tempaltes before running VMs.
 
-##### 4-1. Understand how to manage images
+#### Understand how to manage images
 
 There are two steps for running VMs.
 First, you generate templates for ring and vhost from

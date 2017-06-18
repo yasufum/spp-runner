@@ -1,0 +1,3 @@
+[submodule "qemu-hda"]
+	path = qemu-hda
+	url = https://github.com/yasufum/qemu-hda.git

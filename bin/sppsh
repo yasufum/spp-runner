@@ -21,16 +21,17 @@ parser.add_argument(
         help="Show entries")
 parser.add_argument(
         "-u", "--update", 
-        metavar=("ID|IPADDR", "NEW_HOSTNAME"),
+        metavar=("ipaddr", "new_hostname"),
         nargs=2,
         type=str,
-        help="Update hostname of id or ipaddr")
+        help="Update hostname of ipaddr or id")
 parser.add_argument(
         "-r", "--run",
-        metavar=("ID|IPADDR", "HOSTNAME"),
+        metavar=('ipaddr', 'cmd'),
         nargs=2,
         type=str,
-        help="Run secondary process on the VM")
+        help="Run command on the VM of ipaddr or id " +
+        "(exp: sppsh -r 0 'touch a.txt')")
 parser.add_argument(
         "--shutdown", 
         action="store_true",
@@ -95,15 +96,12 @@ def main():
     # Run secondary process
     elif args.run != None:
         ipaddr = get_ipaddr(args.run[0], y)
-        # [TODO] To launch without start.sh
-        #sec_id = 6
-        #sec_path = "$HOME/dpdk-home/spp/src/vm/src/vm/x86_64-ivshmem-linuxapp-gcc/spp_vm"
-        #opts = "-c 0x03 -n 4 --proc-type=primary -- -p 0x01 -n %d -s 192.168.122.1:6666" % sec_id
+        cmd = args.run[1]
 
-        subprocess.call([
-            "ssh", "-t", str(ipaddr),
-            "bash", "$HOME/dpdk-home/spp/start.sh"
-            ])
+        subprocess.call(
+            ["ssh", "-t", str(ipaddr)] +
+            cmd.split(", ")
+            )
 
     # Shutdown VM
     elif args.shutdown == True:

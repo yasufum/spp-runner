@@ -41,6 +41,26 @@ parser.add_argument(
         help="Shutdown all VMs")
 args = parser.parse_args()
 
+
+def get_ipaddr(target, addr_table):
+    """
+    Resolve IP address from given target
+
+    target must be an IP addr or index of addr_table
+    addr_table is a yaml obj of "/var/lib/libvirt/dnsmasq/virbr0.status"
+    """
+    if re.match(r'^\d+\.\d+\.\d+\.\d+$', target): # ipaddr
+        ipaddr = args.update[0]
+    elif re.match(r'^\d+$', target): # or index number
+        idx = int(target)
+        if idx < len(addr_table):
+            ipaddr = addr_table[idx]["ip-address"]
+    else:
+        print("Invalid ipaddr or id!")
+        raise
+    return ipaddr
+
+
 def main():
     f = open(dns_file, "r")
     y = yaml.load(f)
@@ -50,60 +70,40 @@ def main():
         print("No VMs running...")
         exit()
 
-    
     if args.shutdown_all == True:
         for i in range(0, len(y)):
             # Avoid error for empty hostname
             subprocess.call([
-                "ssh",
-                "-t",
-                y[i]["ip-address"],
-                "sudo",
-                "shutdown",
-                "-h",
-                "now"])
+                "ssh", "-t", y[i]["ip-address"],
+                "sudo", "shutdown", "-h", "now"
+                ])
 
     # Update hostname
     elif args.update != None:
-        if re.match(r'^\d+\.\d+\.\d+\.\d+$', args.update[0]): # ipaddr
-            h = args.update[0]
-        elif re.match(r'^\d+$', args.update[0]): # or index number
-            idx = int(args.update[0])
-            if idx < len(y):
-                h = y[idx]["ip-address"]
-        else:
-            print("Invalid ipaddr or id!")
-            raise
+        ipaddr = get_ipaddr(args.update[0], y)
 
         # Update hostname and reboot
         subprocess.call([
-            "ssh",
-            "-t",
-            str(h),
-            "sudo",
-            "hostnamectl",
-            "set-hostname",
-            str(args.update[1])])
+            "ssh", "-t", str(ipaddr),
+            "sudo", "hostnamectl", "set-hostname", str(args.update[1])
+            ])
         subprocess.call([
-            "ssh",
-            "-t",
-            str(h),
-            "sudo",
-            "reboot"])
+            "ssh", "-t", str(ipaddr),
+            "sudo", "reboot"
+            ])
 
     # Run secondary process
-    # [TODO] secondaryプロセスの起動処理を書く
     elif args.run != None:
-        if re.match(r'^\d+\.\d+\.\d+\.\d+$', args.run[0]): # ipaddr
-            h = args.run[0]
-        elif re.match(r'^\d+$', args.run[0]): # or index number
-            idx = int(args.run[0])
-            if idx < len(y):
-                h = y[idx]["ip-address"]
-        else:
-            print("Invalid ipaddr or id!")
-            raise
-        print("hoge")
+        ipaddr = get_ipaddr(args.run[0], y)
+        # [TODO] To launch without start.sh
+        #sec_id = 6
+        #sec_path = "$HOME/dpdk-home/spp/src/vm/src/vm/x86_64-ivshmem-linuxapp-gcc/spp_vm"
+        #opts = "-c 0x03 -n 4 --proc-type=primary -- -p 0x01 -n %d -s 192.168.122.1:6666" % sec_id
+
+        subprocess.call([
+            "ssh", "-t", str(ipaddr),
+            "bash", "$HOME/dpdk-home/spp/start.sh"
+            ])
 
     # Shutdown VM
     elif args.shutdown == True:
@@ -116,13 +116,9 @@ def main():
 
             if (hn == args.hostname) or re.match(str(i), args.hostname):
                 subprocess.call([
-                    "ssh",
-                    "-t",
-                    y[i]["ip-address"],
-                    "sudo",
-                    "shutdown",
-                    "-h",
-                    "now"])
+                    "ssh", "-t", y[i]["ip-address"],
+                    "sudo", "shutdown", "-h", "now"
+                    ])
                 exit()
 
     # show entries

@@ -10,7 +10,6 @@ import yaml
 
 # params
 sess_name = "spp"
-default_nof_sec = 2
 home_dir = os.environ["HOME"]
 spp_srcdir = "%s/dpdk-home/spp/src" % home_dir
 qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
@@ -37,37 +36,39 @@ vms_ring = y["vms_ring"]
 # vhost VM
 vms_vhost = y["vms_vhost"]
 
-parser = argparse.ArgumentParser(description="Run SPP and VMs")
-parser.add_argument(
-        "-t", "--template",
-        action="store_true",
-        help="Boot template VM")
-parser.add_argument(
-        "-ns", "--nof-sec",
-        type=int, default=2,
-        help="Number of SPP secondaries")
-parser.add_argument(
-        "-nr", "--nof-ring",
-        type=int, default=1,
-        help="Number of VMs running ring")
-parser.add_argument(
-        "-nv", "--nof-vhost",
-        type=int, default=1,
-        help="Number of VMs running vhost")
-parser.add_argument(
-        "-vn", "--vhost-num",
-        type=int, default=1,
-        help="Number of vhost interfaces")
-parser.add_argument(
-        "-nw", "--nof-working",
-        type=int, default=1,
-        help="Number of working window")
 
-args = parser.parse_args()
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run SPP and VMs")
+    parser.add_argument(
+            "-t", "--template",
+            action="store_true",
+            help="Boot template VM")
+    parser.add_argument(
+            "-ns", "--nof-sec",
+            type=int, default=2,
+            help="Number of SPP secondaries")
+    parser.add_argument(
+            "-nr", "--nof-ring",
+            type=int, default=1,
+            help="Number of VMs running ring")
+    parser.add_argument(
+            "-nv", "--nof-vhost",
+            type=int, default=1,
+            help="Number of VMs running vhost")
+    parser.add_argument(
+            "-vn", "--vhost-num",
+            type=int, default=1,
+            help="Number of vhost interfaces")
+    parser.add_argument(
+            "-nw", "--nof-working",
+            type=int, default=1,
+            help="Number of working window")
+    return parser.parse_args()
 
 
 # return tmux windows
-def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
+#def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
+def setup_windows(args):
     windows = [
             # spp controller
             {
@@ -83,8 +84,8 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
             {
                 "win_name": "pri",
                 "dir": work_dir,
-                "cmd": "sh runscripts/primary.sh",
-                "opts": "%s %s %s %s" % (
+                "cmd": "python runscripts/primary.py",
+                "opts": "-d %s -c %s -ch %s -cp %s" % (
                     spp_srcdir, primary["coremask"],
                     ctrler["host"],
                     ctrler["pri_port"]),
@@ -97,7 +98,7 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
         "win_name": "sec",
         "dir": work_dir,
         "cmd": "sudo python runscripts/secondaries.py",
-        "opts": "--num %s --sppdir %s" % (nof_sec, spp_srcdir),
+        "opts": "--num %s --sppdir %s" % (args.nof_sec, spp_srcdir),
         "enter_key": True
         })
 
@@ -111,9 +112,9 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
            "enter_key": True
            })
     else:
-        if nof_ring > 0:
+        if args.nof_ring > 0:
             tmpary = []
-            for i in range(0, nof_ring):
+            for i in range(0, args.nof_ring):
                 tmpary.append(str(vms_ring[i]["id"]))
             nof_ring_str = ",".join(tmpary)
 
@@ -136,14 +137,14 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
             })
     else:
         tmpary = []
-        if nof_vhost > 0:
-            for i in range(0, nof_vhost):
+        if args.nof_vhost > 0:
+            for i in range(0, args.nof_vhost):
                 tmpary.append(str(vms_vhost[i]["id"]))
 
             for vid in tmpary:
                 remove_sock(vid)
 
-            # nof_vhost is passed to run-vm.py as comma-separated values.
+            # args.nof_vhost is passed to run-vm.py as comma-separated values.
             nof_vhost_str = ",".join(tmpary)
             windows.append({
                 "win_name": "vm_v",
@@ -154,8 +155,8 @@ def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
                 })
             
     # working windows
-    if nof_working > 0:
-        for i in range(0, nof_working):
+    if args.nof_working > 0:
+        for i in range(0, args.nof_working):
             windows.append({
                 "win_name": "w%d" % i,
                 "dir": work_dir,
@@ -194,13 +195,10 @@ def remove_sock(sid):
 
 
 def main():
-    nof_sec = args.nof_sec
-    nof_ring = args.nof_ring
-    nof_vhost = args.nof_vhost
-    nof_working = args.nof_working
+    args = parse_args()
 
     cmd = []  # contains tmux commands
-    for w in setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
+    for w in setup_windows(args):
         if len(cmd) == 0:
             new_sess = "tmux new-session -d -s %s -n %s -c %s" % (
                     sess_name,

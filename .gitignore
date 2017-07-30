@@ -1,3 +1,4 @@
 config/*
 log/*.log
 qemu_cmd_line.txt
+.*.swp

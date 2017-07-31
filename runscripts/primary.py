@@ -56,27 +56,24 @@ def main():
     cmd_path = '%s/primary/%s/spp_primary' % (
             args.sppdir, os.getenv('RTE_TARGET')
             )
-    if os.path.isfile(cmd_path):
+    if not os.path.isfile(cmd_path):
         cmd_path = '%s/primary/src/primary/%s/spp_primary' % (
                 args.sppdir, os.getenv('RTE_TARGET')
                 )
-
-    cmd = [
-            'sudo', '-E', cmd_path,
-            '-c', args.coremask,
-            '-n', str(args.mem_chan),
-            '--socket-mem', str(args.mem),
-            '--huge-dir=/dev/hugepages',
-            '--proc-type=primary',
-            '--',
-            '-p', args.portmask,
-            '-n', str(args.num_ring),
-            '-s', '%s:%d' % (args.ctrl_host, args.ctrl_port),
-            '2>&1 > log/primary.log'
-            ]
+    subprocess.call('sudo pwd', shell=True)
+    cmd = 'sudo -E %s \\\n' % cmd_path
+    cmd += '  -c %s \\\n' % args.coremask
+    cmd += '  -n %d \\\n' % args.mem_chan
+    cmd += '  --socket-mem %d \\\n' % args.mem
+    cmd += '  --huge-dir=/dev/hugepages \\\n'
+    cmd += '  --proc-type=primary \\\n'
+    cmd += '  -- \\\n'
+    cmd += '  -p %s \\\n' % args.portmask
+    cmd += '  -n %d \\\n' % args.num_ring
+    cmd += '  -s %s:%d \\\n' % (args.ctrl_host, args.ctrl_port)
     
-    #print(cmd)
-    subprocess.call(cmd)
+    print(cmd)
+    subprocess.call(cmd, shell=True)
 
 if __name__ == '__main__':
     main()

@@ -12,9 +12,10 @@ import yaml
 sess_name = "spp"
 home_dir = os.environ["HOME"]
 spp_srcdir = "%s/dpdk-home/spp/src" % home_dir
-qemu_dir = "$HOME/dpdk-home/qemu-setup/runscripts"
 run_script = "run-vm.py"
 work_dir = os.path.dirname(__file__) + "/.."
+qemu_dir = "%s/qemu-hda/runscripts" % work_dir
+hda = "%s/qemu-hda/iso/ubuntu-16.04.2-server-amd64.qcow2" % work_dir
 
 # Load config
 f = open(work_dir + "/conf.yml", "r")
@@ -49,11 +50,11 @@ def parse_args():
             help="Number of SPP secondaries")
     parser.add_argument(
             "-nr", "--nof-ring",
-            type=int, default=1,
+            type=int, default=0,
             help="Number of VMs running ring")
     parser.add_argument(
             "-nv", "--nof-vhost",
-            type=int, default=1,
+            type=int, default=0,
             help="Number of VMs running vhost")
     parser.add_argument(
             "-vn", "--vhost-num",
@@ -97,7 +98,7 @@ def setup_windows(args):
     windows.append({
         "win_name": "sec",
         "dir": work_dir,
-        "cmd": "sudo python runscripts/secondaries.py",
+        "cmd": "python runscripts/secondaries.py",
         "opts": "--num %s --sppdir %s" % (args.nof_sec, spp_srcdir),
         "enter_key": True
         })
@@ -108,7 +109,7 @@ def setup_windows(args):
            "win_name": "vm_r%s" % 0,
            "dir": qemu_dir,
            "cmd": "./%s" % run_script,
-           "opts": "-t ring -i %s" % 0,
+           "opts": "-t ring -i %s -f %s" % (0, hda),
            "enter_key": True
            })
     else:
@@ -122,7 +123,7 @@ def setup_windows(args):
                 "win_name": "vm_r",
                 "dir": qemu_dir,
                 "cmd": "./%s" % run_script,
-                "opts": "-t ring -i %s" % nof_ring_str,
+                "opts": "-t ring -i %s -f %s" % (nof_ring_str, hda),
                 "enter_key": True
                 })
 
@@ -132,7 +133,7 @@ def setup_windows(args):
             "win_name": "vm_v%s" % 0,
             "dir": qemu_dir,
             "cmd": "./%s" % run_script,
-            "opts": "-t vhost -i %s" % 0,
+            "opts": "-t vhost -i %s -f %s" % (0, hda),
             "enter_key": True
             })
     else:
@@ -150,7 +151,7 @@ def setup_windows(args):
                 "win_name": "vm_v",
                 "dir": qemu_dir,
                 "cmd": "./%s" % run_script,
-                "opts": "-t vhost -i %s -vn %s" % (nof_vhost_str, args.vhost_num),
+                "opts": "-t vhost -i %s -vn %s -f %s" % (nof_vhost_str, args.vhost_num, hda),
                 "enter_key": True
                 })
             

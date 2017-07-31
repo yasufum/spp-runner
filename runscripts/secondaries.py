@@ -51,41 +51,42 @@ def main():
 
     args = parse_args()
 
+    cmd_path = '%s/nfv/%s/app/spp_nfv' % (
+            args.sppdir, os.getenv('RTE_TARGET')
+            )
+    if not os.path.isfile(cmd_path):
+        cmd_path = '%s/nfv/src/nfv/%s/spp_nfv' % (
+                args.sppdir, os.getenv('RTE_TARGET')
+                )
+
+    subprocess.call('sudo pwd', shell=True)
     if args.id != None: # run specified sec
         ent = y["secondaries"][args.id-1] # sec id is assumed starting from 1
         logfile = 'log/secondary-%d.log' % ent["id"]
-        cmd_path = '%s/nfv/%s/app/spp_nfv' % (
-                args.sppdir, os.getenv('RTE_TARGET')
-                )
-        if os.path.isfile(cmd_path):
-            cmd_path = '%s/nfv/src/nfv/%s/spp_nfv' % (
-                    args.sppdir, os.getenv('RTE_TARGET')
-                    )
-        cmd = ['sudo', '-E', cmd_path,
-                '-c', ent["coremask"],
-                '-n', str(args.num_memchan),
-                '--proc-type=secondary',
-                '--',
-                '-n', str(ent["id"]),
-                '-s', '%s:%d' % (args.ctr_host, args.ctr_port),
-                '2>&1 > %s' % logfile
-                ]
-        subprocess.call(cmd)
+        cmd = 'sudo -E %s \\\n' % cmd_path
+        cmd += '  -c %s \\\n' % ent["coremask"]
+        cmd += '  -n %d \\\n' % args.num_memchan
+        cmd += '  --proc-type=secondary \\\n'
+        cmd += '  -- \\\n'
+        cmd += '  -n %d \\\n' % ent["id"]
+        cmd += '  -s %s:%d \\\n' % (args.ctr_host, args.ctr_port)
+        cmd += '  > %s 2>&1 &' % logfile
+        print(cmd)
+        subprocess.call(cmd, shell=True)
     else: # run all of secondaries
         for i in range(0, args.num):
             ent = y["secondaries"][i]
             logfile = 'log/secondary-%d.log' % ent["id"]
-            cmd = ['sudo', '-E',
-                    '%s/nfv/src/nfv/x86_64-ivshmem-linuxapp-gcc/app/spp_nfv' % args.sppdir,
-                    '-c', ent["coremask"],
-                    '-n', str(args.num_memchan),
-                    '--proc-type=secondary',
-                    '--',
-                    '-n', str(ent["id"]),
-                    '-s', '%s:%d' % (args.ctr_host, args.ctr_port),
-                    '2>&1 > %s' % logfile
-                    ]
-            subprocess.call(cmd)
+            cmd = 'sudo -E %s \\\n' % cmd_path
+            cmd += '  -c %s \\\n' % ent["coremask"]
+            cmd += '  -n %d \\\n' % args.num_memchan
+            cmd += '  --proc-type=secondary \\\n'
+            cmd += '  -- \\\n'
+            cmd += '  -n %d \\\n' % ent["id"]
+            cmd += '  -s %s:%d \\\n' % (args.ctr_host, args.ctr_port)
+            cmd += '  > %s 2>&1 &' % logfile
+            print(cmd)
+            subprocess.call(cmd, shell=True)
 
 
 if __name__ == '__main__':

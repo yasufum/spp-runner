@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
 import argparse
 import subprocess
 
@@ -52,9 +53,16 @@ def parse_args():
 
 def main():
     args = parse_args()
+    cmd_path = '%s/primary/%s/spp_primary' % (
+            args.sppdir, os.getenv('RTE_TARGET')
+            )
+    if os.path.isfile(cmd_path):
+        cmd_path = '%s/primary/src/primary/%s/spp_primary' % (
+                args.sppdir, os.getenv('RTE_TARGET')
+                )
+
     cmd = [
-            'sudo', '-E',
-            '%s/primary/src/primary/x86_64-ivshmem-linuxapp-gcc/spp_primary' % args.sppdir,
+            'sudo', '-E', cmd_path,
             '-c', args.coremask,
             '-n', str(args.mem_chan),
             '--socket-mem', str(args.mem),

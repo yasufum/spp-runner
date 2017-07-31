@@ -54,8 +54,14 @@ def main():
     if args.id != None: # run specified sec
         ent = y["secondaries"][args.id-1] # sec id is assumed starting from 1
         logfile = 'log/secondary-%d.log' % ent["id"]
-        cmd = ['sudo', '-E',
-                '%s/nfv/src/nfv/x86_64-ivshmem-linuxapp-gcc/app/spp_nfv' % args.sppdir,
+        cmd_path = '%s/nfv/%s/app/spp_nfv' % (
+                args.sppdir, os.getenv('RTE_TARGET')
+                )
+        if os.path.isfile(cmd_path):
+            cmd_path = '%s/nfv/src/nfv/%s/spp_nfv' % (
+                    args.sppdir, os.getenv('RTE_TARGET')
+                    )
+        cmd = ['sudo', '-E', cmd_path,
                 '-c', ent["coremask"],
                 '-n', str(args.num_memchan),
                 '--proc-type=secondary',

@@ -15,8 +15,9 @@ A management tool for SPP.
 ### SPP
 
 [SPP](http://www.dpdk.org/browse/apps/spp/)
-is a kind of Inter-VM communication technology
-which is implemented using Intel DPDK.
+is a framework to easily interconnect DPDK applications together,
+and assign resources dynamically to these applications.
+It is implemented using Intel DPDK.
 You can configure network path between applications on host and guest VMs
 with SPP.
 SPP provides not only high-performance connectivity, but also flexibility
@@ -31,10 +32,8 @@ with patch panel like interface.
 
 ## Usage
 
-First, update submodule `qemu-hda` and setup VMs as described in
-[Submodule](#submodule) section.
-
-After setup VMs and install SPP on it, you can run SPP.
+First, update submodule `qemu-hda` as described in 'How to use' section,
+and setup VMs and install SPP on them.
 
 ### Run SPP
 
@@ -50,14 +49,13 @@ $ ./bin/wakeup.py -ns 2 -nr 1 -nv 1
 $ ./bin/wakeup.py
 ```
 
-`wakeup.py` command opens several windows for each of processes as given
-arguments.
+`wakeup.py` command opens several windows for following processes.
 
   1. SPP controller
   1. SPP primary
-  1. SPP secondaries on host
-  1. ring VM
-  1. vhost VM
+  1. SPP secondaries
+  1. QEMU(ring VMs)
+  1. QEMU(vhost VMs)
   1. working dir
 
 Refer help for details.
@@ -244,7 +242,7 @@ Run `wakeup.py`.
   $ ./bin/wakeup.py
   ```
 
-Six tmux's windows appear in your terminal and last window is focused.
+It launches tmux and open windows for each processes.
 In primary, secondaries and VMs window, command is prompted for input
 password
 (SPP controller doesn't require sudo).

@@ -1,58 +1,59 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import sys
-import yaml
-import re
 import argparse
+import re
 import subprocess
+import yaml
 
 dns_file = "/var/lib/libvirt/dnsmasq/virbr0.status"
 
-parser = argparse.ArgumentParser(description="Login VM listed in %s" % dns_file)
+parser = argparse.ArgumentParser(
+    description="Login VM listed in %s" % dns_file)
 parser.add_argument(
-        "hostname",
-        nargs="?",
-        type=str,
-        help="Login host")
+    "hostname",
+    nargs="?",
+    type=str,
+    help="Login host")
 parser.add_argument(
-        "-l", "--list", 
-        action="store_true",
-        help="Show entries")
+    "-l", "--list",
+    action="store_true",
+    help="Show entries")
 parser.add_argument(
-        "-u", "--update", 
-        metavar=("ipaddr", "new_hostname"),
-        nargs=2,
-        type=str,
-        help="Update hostname of ipaddr or id")
+    "-u", "--update",
+    metavar=("ipaddr", "new_hostname"),
+    nargs=2,
+    type=str,
+    help="Update hostname of ipaddr or id")
 parser.add_argument(
-        "-r", "--run",
-        metavar=('ipaddr', 'cmd'),
-        nargs=2,
-        type=str,
-        help="Run command on the VM of ipaddr or id " +
-        "(exp: sppsh -r 0 'touch a.txt')")
+    "-r", "--run",
+    metavar=('ipaddr', 'cmd'),
+    nargs=2,
+    type=str,
+    help="Run command on the VM of ipaddr or id " +
+    "(exp: sppsh -r 0 'touch a.txt')")
 parser.add_argument(
-        "--shutdown", 
-        action="store_true",
-        help="Shutdown VM")
+    "--shutdown",
+    action="store_true",
+    help="Shutdown VM")
 parser.add_argument(
-        "--shutdown-all", 
-        action="store_true",
-        help="Shutdown all VMs")
+    "--shutdown-all",
+    action="store_true",
+    help="Shutdown all VMs")
 args = parser.parse_args()
 
 
 def get_ipaddr(target, addr_table):
-    """
-    Resolve IP address from given target
 
-    target must be an IP addr or index of addr_table
-    addr_table is a yaml obj of "/var/lib/libvirt/dnsmasq/virbr0.status"
+    """Resolve IP address from given target
+
+    Target must be an IP addr or index of addr_table.
+    addr_table is a yaml obj of '/var/lib/libvirt/dnsmasq/virbr0.status'
     """
-    if re.match(r'^\d+\.\d+\.\d+\.\d+$', target): # ipaddr
+
+    if re.match(r'^\d+\.\d+\.\d+\.\d+$', target):  # ipaddr
         ipaddr = args.update[0]
-    elif re.match(r'^\d+$', target): # or index number
+    elif re.match(r'^\d+$', target):  # or index number
         idx = int(target)
         if idx < len(addr_table):
             ipaddr = addr_table[idx]["ip-address"]
@@ -71,7 +72,7 @@ def main():
         print("No VMs running...")
         exit()
 
-    if args.shutdown_all == True:
+    if args.shutdown_all is True:
         for i in range(0, len(y)):
             # Avoid error for empty hostname
             subprocess.call([
@@ -80,7 +81,7 @@ def main():
                 ])
 
     # Update hostname
-    elif args.update != None:
+    elif args.update is not None:
         ipaddr = get_ipaddr(args.update[0], y)
 
         # Update hostname and reboot
@@ -94,7 +95,7 @@ def main():
             ])
 
     # Run secondary process
-    elif args.run != None:
+    elif args.run is not None:
         ipaddr = get_ipaddr(args.run[0], y)
         cmd = args.run[1]
 
@@ -104,10 +105,10 @@ def main():
             )
 
     # Shutdown VM
-    elif args.shutdown == True:
+    elif args.shutdown is True:
         for i in range(0, len(y)):
             # Avoid error for empty hostname
-            if y[i].has_key("hostname") == True:
+            if "hostname" in y[i]:
                 hn = y[i]["hostname"]
             else:
                 hn = ""
@@ -120,10 +121,10 @@ def main():
                 exit()
 
     # show entries
-    elif args.hostname == None or args.list == True:
+    elif args.hostname is None or args.list is True:
         i = 0
         for ent in y:
-            if ent.has_key("hostname") == True:
+            if "hostname" in ent:
                 hn = ent["hostname"]
             else:
                 hn = ""
@@ -135,7 +136,7 @@ def main():
     else:
         for i in range(0, len(y)):
             # Avoid error for empty hostname
-            if y[i].has_key("hostname") == True:
+            if "hostname" in y[i]:
                 hn = y[i]["hostname"]
             else:
                 hn = ""

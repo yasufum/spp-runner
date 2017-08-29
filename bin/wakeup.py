@@ -5,7 +5,6 @@
 
 import argparse
 import os
-import sys
 import yaml
 
 # params
@@ -42,58 +41,57 @@ vms_vhost = y["vms_vhost"]
 def parse_args():
     parser = argparse.ArgumentParser(description="Run SPP and VMs")
     parser.add_argument(
-            "-t", "--template",
-            action="store_true",
-            help="Boot template VM")
+        "-t", "--template",
+        action="store_true",
+        help="Boot template VM")
     parser.add_argument(
-            "-ns", "--nof-sec",
-            type=int, default=2,
-            help="Number of SPP secondaries")
+        "-ns", "--nof-sec",
+        type=int, default=2,
+        help="Number of SPP secondaries")
     parser.add_argument(
-            "-nr", "--nof-ring",
-            type=int, default=0,
-            help="Number of VMs running ring")
+        "-nr", "--nof-ring",
+        type=int, default=0,
+        help="Number of VMs running ring")
     parser.add_argument(
-            "-nv", "--nof-vhost",
-            type=int, default=0,
-            help="Number of VMs running vhost")
+        "-nv", "--nof-vhost",
+        type=int, default=0,
+        help="Number of VMs running vhost")
     parser.add_argument(
-            "-vn", "--vhost-num",
-            type=int, default=1,
-            help="Number of vhost interfaces")
+        "-vn", "--vhost-num",
+        type=int, default=1,
+        help="Number of vhost interfaces")
     parser.add_argument(
-            "-nw", "--nof-working",
-            type=int, default=1,
-            help="Number of working window")
+        "-nw", "--nof-working",
+        type=int, default=1,
+        help="Number of working window")
     return parser.parse_args()
 
 
 # return tmux windows
-#def setup_windows(nof_sec, nof_ring, nof_vhost, nof_working):
 def setup_windows(args):
     windows = [
-            # spp controller
-            {
-                "win_name": "ctrler",
-                "dir": spp_srcdir,
-                "cmd": "python spp.py",
-                "opts": "-p %s -s %s" % (
-                    ctrler["pri_port"], ctrler["sec_port"]),
-                "enter_key": True
-                },
+        # spp controller
+        {
+            "win_name": "ctrler",
+            "dir": spp_srcdir,
+            "cmd": "python spp.py",
+            "opts": "-p %s -s %s" % (
+                ctrler["pri_port"], ctrler["sec_port"]),
+            "enter_key": True
+        },
 
-            # spp primary
-            {
-                "win_name": "pri",
-                "dir": work_dir,
-                "cmd": "python runscripts/primary.py",
-                "opts": "-d %s -c %s -ch %s -cp %s" % (
-                    spp_srcdir, primary["coremask"],
-                    ctrler["host"],
-                    ctrler["pri_port"]),
-                "enter_key": True
-                }
-            ]
+        # spp primary
+        {
+            "win_name": "pri",
+            "dir": work_dir,
+            "cmd": "python runscripts/primary.py",
+            "opts": "-d %s -c %s -ch %s -cp %s" % (
+                spp_srcdir, primary["coremask"],
+                ctrler["host"],
+                ctrler["pri_port"]),
+            "enter_key": True
+        }
+    ]
 
     # spp secondaries
     windows.append({
@@ -105,14 +103,14 @@ def setup_windows(args):
         })
 
     # VM - ring
-    if args.template == True:
-       windows.append({
-           "win_name": "vm_r%s" % 0,
-           "dir": qemu_script_dir,
-           "cmd": "./%s" % run_script,
-           "opts": "-t ring -i %s -f %s" % (0, hda_path),
-           "enter_key": True
-           })
+    if args.template is True:
+        windows.append({
+            "win_name": "vm_r%s" % 0,
+            "dir": qemu_script_dir,
+            "cmd": "./%s" % run_script,
+            "opts": "-t ring -i %s -f %s" % (0, hda_path),
+            "enter_key": True
+        })
     else:
         if args.nof_ring > 0:
             tmpary = []
@@ -126,17 +124,17 @@ def setup_windows(args):
                 "cmd": "./%s" % run_script,
                 "opts": "-t ring -i %s -f %s" % (nof_ring_str, hda_path),
                 "enter_key": True
-                })
+            })
 
     # VM - vhost
-    if args.template == True:
+    if args.template is True:
         windows.append({
             "win_name": "vm_v%s" % 0,
             "dir": qemu_script_dir,
             "cmd": "./%s" % run_script,
             "opts": "-t vhost -i %s -f %s" % (0, hda_path),
             "enter_key": True
-            })
+        })
     else:
         tmpary = []
         if args.nof_vhost > 0:
@@ -157,7 +155,7 @@ def setup_windows(args):
                     ),
                 "enter_key": True
                 })
-            
+
     # working windows
     if args.nof_working > 0:
         for i in range(0, args.nof_working):
@@ -178,15 +176,15 @@ def gen_send_keys(win_name, cmd, opts, enter_key):
         send_keys = "tmux send-keys -t %s" % win_name
     elif opts == "":
         send_keys = "tmux send-keys -t %s \"%s\"" % (
-                win_name,
-                cmd)
+            win_name,
+            cmd)
     else:
         send_keys = "tmux send-keys -t %s \"%s %s\"" % (
-                win_name,
-                cmd,
-                opts)
+            win_name,
+            cmd,
+            opts)
 
-    if enter_key == True:
+    if enter_key is True:
         send_keys += " C-m"
 
     return send_keys
@@ -205,23 +203,24 @@ def main():
     for w in setup_windows(args):
         if len(cmd) == 0:
             new_sess = "tmux new-session -d -s %s -n %s -c %s" % (
-                    sess_name,
-                    w["win_name"],
-                    w["dir"])
-            send_keys = gen_send_keys(w["win_name"], w["cmd"], w["opts"], w["enter_key"])
+                sess_name,
+                w["win_name"],
+                w["dir"])
+            send_keys = gen_send_keys(
+                w["win_name"], w["cmd"], w["opts"], w["enter_key"])
             cmd.append(new_sess)
             cmd.append(send_keys)
         else:
             new_win = "tmux new-window -n %s -c \"%s\"" % (
-                    w["win_name"],
-                    w["dir"])
-            send_keys = gen_send_keys(w["win_name"], w["cmd"], w["opts"], w["enter_key"])
+                w["win_name"],
+                w["dir"])
+            send_keys = gen_send_keys(
+                w["win_name"], w["cmd"], w["opts"], w["enter_key"])
             cmd.append(new_win)
             cmd.append(send_keys)
-  
+
     cmd.append("tmux attach -t %s" % sess_name)
-   
-  
+
     for c in cmd:
         print(c)
         os.system(c)

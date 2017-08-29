@@ -95,8 +95,8 @@ Please refer to [README](qemu-hda/README.md) for details.
 $ git submodule init
 Submodule 'qemu-hda' (https://github.com/yasufum/qemu-hda.git) registered for path 'qemu-hda'
 $ git submodule update
-Cloning into '/Users/ogawa/program/working/spp-runner/qemu-hda'...
-Submodule path 'qemu-hda': checked out '72a92e1fecdd794ddf593b3ef1cf210979b87491'
+Cloning into '/path/to/spp-runner/qemu-hda'...
+Submodule path 'qemu-hda': checked out '...'
 ```
 
 ### Prepare VM image

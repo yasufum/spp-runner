@@ -3,19 +3,20 @@
 
 # Run SPP, then QEMU within tmux.
 
+import argparse
 import os
 import sys
-import argparse
 import yaml
 
 # params
-sess_name = "spp"
+sess_name = "spp"   # tmux session name
 home_dir = os.environ["HOME"]
 spp_srcdir = "%s/dpdk-home/spp/src" % home_dir
 run_script = "run-vm.py"
 work_dir = os.path.dirname(__file__) + "/.."
-qemu_dir = "%s/qemu-hda/runscripts" % work_dir
-hda = "%s/qemu-hda/iso/ubuntu-16.04.2-server-amd64.qcow2" % work_dir
+qemu_script_dir = "%s/qemu-hda/runscripts" % work_dir
+hda = "ubuntu-16.04.3-server-amd64.qcow2"
+hda_path = "%s/../qemu-hda/iso/%s" % (work_dir, hda)
 
 # Load config
 f = open(work_dir + "/conf.yml", "r")
@@ -107,9 +108,9 @@ def setup_windows(args):
     if args.template == True:
        windows.append({
            "win_name": "vm_r%s" % 0,
-           "dir": qemu_dir,
+           "dir": qemu_script_dir,
            "cmd": "./%s" % run_script,
-           "opts": "-t ring -i %s -f %s" % (0, hda),
+           "opts": "-t ring -i %s -f %s" % (0, hda_path),
            "enter_key": True
            })
     else:
@@ -121,9 +122,9 @@ def setup_windows(args):
 
             windows.append({
                 "win_name": "vm_r",
-                "dir": qemu_dir,
+                "dir": qemu_script_dir,
                 "cmd": "./%s" % run_script,
-                "opts": "-t ring -i %s -f %s" % (nof_ring_str, hda),
+                "opts": "-t ring -i %s -f %s" % (nof_ring_str, hda_path),
                 "enter_key": True
                 })
 
@@ -131,9 +132,9 @@ def setup_windows(args):
     if args.template == True:
         windows.append({
             "win_name": "vm_v%s" % 0,
-            "dir": qemu_dir,
+            "dir": qemu_script_dir,
             "cmd": "./%s" % run_script,
-            "opts": "-t vhost -i %s -f %s" % (0, hda),
+            "opts": "-t vhost -i %s -f %s" % (0, hda_path),
             "enter_key": True
             })
     else:
@@ -149,9 +150,11 @@ def setup_windows(args):
             nof_vhost_str = ",".join(tmpary)
             windows.append({
                 "win_name": "vm_v",
-                "dir": qemu_dir,
+                "dir": qemu_script_dir,
                 "cmd": "./%s" % run_script,
-                "opts": "-t vhost -i %s -vn %s -f %s" % (nof_vhost_str, args.vhost_num, hda),
+                "opts": "-t vhost -i %s -vn %s -f %s" % (
+                    nof_vhost_str, args.vhost_num, hda_path
+                    ),
                 "enter_key": True
                 })
             

@@ -32,9 +32,6 @@ with patch panel like interface.
 
 ## Usage
 
-First, update submodule `qemu-hda` as described in 'How to use' section,
-and setup VMs and install SPP on them.
-
 ### Run SPP
 
 You start by running `bin/wakeup.py` which is a script for launching SPP.
@@ -84,20 +81,6 @@ Refer help for details.
 
 
 ## How to use
-
-### Submodule
-
-Clone submodule `qemu-hda` as following.
-This module is for creating HDA file and install OS on it.
-Please refer to [README](qemu-hda/README.md) for details.
-
-```sh
-$ git submodule init
-Submodule 'qemu-hda' (https://github.com/yasufum/qemu-hda.git) registered for path 'qemu-hda'
-$ git submodule update
-Cloning into '/path/to/spp-runner/qemu-hda'...
-Submodule path 'qemu-hda': checked out '...'
-```
 
 ### Prepare VM image
 

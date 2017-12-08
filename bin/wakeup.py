@@ -11,11 +11,12 @@ import yaml
 sess_name = "spp"   # tmux session name
 home_dir = os.environ["HOME"]
 spp_srcdir = "%s/dpdk-home/spp/src" % home_dir
-run_script = "run-vm.py"
+qemu_hda_dir = "%s/dpdk-home/qemu-hda" % home_dir
 work_dir = os.path.dirname(__file__) + "/.."
-qemu_script_dir = "%s/qemu-hda/runscripts" % work_dir
+
+run_vm_script = "bin/run-vm.py"
 hda = "ubuntu-16.04.3-server-amd64.qcow2"
-hda_path = "%s/../qemu-hda/iso/%s" % (work_dir, hda)
+hda_path = "%s/hda/%s" % (qemu_hda_dir, hda)
 
 # Load config
 f = open(work_dir + "/conf.yml", "r")
@@ -106,8 +107,8 @@ def setup_windows(args):
     if args.template is True:
         windows.append({
             "win_name": "vm_r%s" % 0,
-            "dir": qemu_script_dir,
-            "cmd": "./%s" % run_script,
+            "dir": qemu_hda_dir,
+            "cmd": "./%s" % run_vm_script,
             "opts": "-t ring -i %s -f %s" % (0, hda_path),
             "enter_key": True
         })
@@ -120,8 +121,8 @@ def setup_windows(args):
 
             windows.append({
                 "win_name": "vm_r",
-                "dir": qemu_script_dir,
-                "cmd": "./%s" % run_script,
+                "dir": qemu_hda_dir,
+                "cmd": "./%s" % run_vm_script,
                 "opts": "-t ring -i %s -f %s" % (nof_ring_str, hda_path),
                 "enter_key": True
             })
@@ -130,8 +131,8 @@ def setup_windows(args):
     if args.template is True:
         windows.append({
             "win_name": "vm_v%s" % 0,
-            "dir": qemu_script_dir,
-            "cmd": "./%s" % run_script,
+            "dir": qemu_hda_dir,
+            "cmd": "./%s" % run_vm_script,
             "opts": "-t vhost -i %s -f %s" % (0, hda_path),
             "enter_key": True
         })
@@ -148,8 +149,8 @@ def setup_windows(args):
             nof_vhost_str = ",".join(tmpary)
             windows.append({
                 "win_name": "vm_v",
-                "dir": qemu_script_dir,
-                "cmd": "./%s" % run_script,
+                "dir": qemu_hda_dir,
+                "cmd": "./%s" % run_vm_script,
                 "opts": "-t vhost -i %s -vn %s -f %s" % (
                     nof_vhost_str, args.vhost_num, hda_path
                     ),
@@ -170,8 +171,9 @@ def setup_windows(args):
     return windows
 
 
-# Generate options for tmux windows
 def gen_send_keys(win_name, cmd, opts, enter_key):
+    """Generate options for tmux windows"""
+
     if cmd == "":
         send_keys = "tmux send-keys -t %s" % win_name
     elif opts == "":
@@ -190,8 +192,9 @@ def gen_send_keys(win_name, cmd, opts, enter_key):
     return send_keys
 
 
-# remove /tmp/sock* before run vhost VMs
 def remove_sock(sid):
+    """remove /tmp/sock* before run vhost VMs"""
+
     cmd = "sudo rm -f /tmp/sock%s*" % sid
     os.system(cmd)
 

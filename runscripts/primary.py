@@ -19,7 +19,7 @@ def parse_args():
         help="coremask")
     parser.add_argument(
         "-p", "--portmask",
-        type=str, default='0x0f',
+        type=str, default='0x03',
         help="portmask")
     parser.add_argument(
         "-ch", "--ctrl-host",
@@ -87,6 +87,17 @@ def parse_vdev_opt(opt_str):
             raise("Invalid vdev option!")
 
 
+def clean_sock_file(sock_id):
+    """Remove socket file before creating vhost interface
+
+    Argument ids is expected to be an int.
+    """
+
+    sock_dir = "/tmp"
+    cmd = "sudo rm -f %s/sock%d" % (sock_dir, sock_id)
+    subprocess.call(cmd, shell=True)
+
+
 def main():
     args = parse_args()
     cmd_path = '%s/primary/%s/spp_primary' % (
@@ -114,6 +125,7 @@ def main():
     if args.vdev_vhost:
         vdev_ary = parse_vdev_opt(args.vdev_vhost)
         for i in vdev_ary:
+            clean_sock_file(i)
             nof_q = 1  # Number of vhost queues
             opt = 'net_vhost%d,iface=/tmp/sock%d,queues=%d' % (
                 i, i, nof_q)

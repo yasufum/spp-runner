@@ -41,6 +41,10 @@ def parse_args():
         "-mc", "--mem-chan",
         type=int, default=4,
         help="The number of memory channels")
+    parser.add_argument(
+        "-vd", "--vdev",
+        type=str,
+        help="DPDK vdev option")
     return parser.parse_args()
 
 
@@ -60,6 +64,8 @@ def main():
     cmd += '  --socket-mem %d \\\n' % args.mem
     cmd += '  --huge-dir=/dev/hugepages \\\n'
     cmd += '  --proc-type=primary \\\n'
+    if args.vdev:
+        cmd += '  --vdev \'%s\' \\\n' % args.vdev
     cmd += '  -- \\\n'
     cmd += '  -p %s \\\n' % args.portmask
     cmd += '  -n %d \\\n' % args.num_ring
@@ -67,6 +73,7 @@ def main():
 
     print(cmd)
     subprocess.call(cmd, shell=True)
+
 
 if __name__ == '__main__':
     main()

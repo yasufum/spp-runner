@@ -6,7 +6,8 @@ controller:
   sec_port: 6666
 
 primary:
-  coremask: 0x03  # 2 cores
+  coremask: "0x03"  # 2 cores
+  portmask: "0x03"  # 2 ports
 
 secondaries:
   - id: 1

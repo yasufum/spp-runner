@@ -86,8 +86,8 @@ def setup_windows(args):
             "win_name": "pri",
             "dir": work_dir,
             "cmd": "python runscripts/primary.py",
-            "opts": "-d %s -c %s -ch %s -cp %s" % (
-                spp_srcdir, primary["coremask"],
+            "opts": "-d %s -c %s -p %s -ch %s -cp %s" % (
+                spp_srcdir, primary["coremask"], primary["portmask"],
                 ctrler["host"],
                 ctrler["pri_port"]),
             "enter_key": True

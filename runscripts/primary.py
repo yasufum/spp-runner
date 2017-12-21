@@ -45,6 +45,14 @@ def parse_args():
         "-vd", "--vdev",
         type=str, nargs='*',
         help="vdev options, separate with space if two or more")
+    parser.add_argument(
+        "-vdt", "--vdev-tap",
+        type=int,
+        help="The number of TUN/TAP vdevs")
+    parser.add_argument(
+        "-vdv", "--vdev-vhost",
+        type=int,
+        help="The number of vhost vdevs")
     return parser.parse_args()
 
 
@@ -67,6 +75,14 @@ def main():
     if args.vdev:
         for vd in args.vdev:
             cmd += '  --vdev \'%s\' \\\n' % vd
+    elif args.vdev_tap:
+        for i in range(args.vdev_tap):
+            opt = 'net_tap%d,iface=vtap%d' % (i, i)
+            cmd += '  --vdev \'%s\' \\\n' % opt
+    elif args.vdev_vhost:
+        for i in range(args.vdev_vhost):
+            opt = 'net_vhost%d,iface=/tmp/sock%d,queues=1' % (i, i)
+            cmd += '  --vdev \'%s\' \\\n' % opt
     cmd += '  -- \\\n'
     cmd += '  -p %s \\\n' % args.portmask
     cmd += '  -n %d \\\n' % args.num_ring

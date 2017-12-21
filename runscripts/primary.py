@@ -47,13 +47,44 @@ def parse_args():
         help="vdev options, separate with space if two or more")
     parser.add_argument(
         "-vdt", "--vdev-tap",
-        type=int,
-        help="The number of TUN/TAP vdevs")
+        type=str,
+        help="TUN/TAP vdev IDs, assing '1-3' or '1,2,3' for three IDs")
     parser.add_argument(
         "-vdv", "--vdev-vhost",
-        type=int,
-        help="The number of vhost vdevs")
+        type=str,
+        help="vhost vdev IDs, assing '1-3' or '1,2,3' for three IDs")
     return parser.parse_args()
+
+
+def parse_vdev_opt(opt_str):
+    """Parse IDs for vdev option
+
+    It supports two types of description of IDs.
+    1. Incremental number of a range ('1-3' or '10-20')
+    2. discreted number separated with comma ('1,2,3' or '1,5,8')
+    """
+
+    # Return "1-3" as [1,2,3]
+    if opt_str.find("-") != -1:
+        print(opt_str.find("-"))
+        print("opt_str: %s" % opt_str)
+        tmp = opt_str.split("-")
+        return range(int(tmp[0]), int(tmp[1])+1)
+
+    # Return "1,3,5" as [1,3,5]
+    elif opt_str.find(",") != -1:
+        ary = []
+        for s in opt_str.split(","):
+            ary.append(int(s))
+        return ary
+    # Return "1" as [1], or raise if invalid option
+    else:
+        import re
+        matched = re.match(r"\d+", opt_str)
+        if matched:
+            return [int(opt_str)]
+        else:
+            raise("Invalid vdev option!")
 
 
 def main():
@@ -75,13 +106,17 @@ def main():
     if args.vdev:
         for vd in args.vdev:
             cmd += '  --vdev \'%s\' \\\n' % vd
-    elif args.vdev_tap:
-        for i in range(args.vdev_tap):
+    if args.vdev_tap:
+        vdev_ary = parse_vdev_opt(args.vdev_tap)
+        for i in vdev_ary:
             opt = 'net_tap%d,iface=vtap%d' % (i, i)
             cmd += '  --vdev \'%s\' \\\n' % opt
-    elif args.vdev_vhost:
-        for i in range(args.vdev_vhost):
-            opt = 'net_vhost%d,iface=/tmp/sock%d,queues=1' % (i, i)
+    if args.vdev_vhost:
+        vdev_ary = parse_vdev_opt(args.vdev_vhost)
+        for i in vdev_ary:
+            nof_q = 1  # Number of vhost queues
+            opt = 'net_vhost%d,iface=/tmp/sock%d,queues=%d' % (
+                i, i, nof_q)
             cmd += '  --vdev \'%s\' \\\n' % opt
     cmd += '  -- \\\n'
     cmd += '  -p %s \\\n' % args.portmask

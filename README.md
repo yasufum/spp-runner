@@ -4,7 +4,14 @@
 
 - [What is this](#what-is-this)
 - [Install](#install)
-- [Usage](#usage)
+- [How to use](#how-to-use)
+  - [Run SPP](#run-spp)
+  - [Login to VMs](#login-to-vms)
+- [Detailed usage](#detailed-usage)
+  - [Prepare VM image](#prepare-vm-image)
+  - [Configuration](#configuration)
+  - [Generate templates for VMs](#generate-templates-for-vms)
+  - [Runscripts](#runscripts )
 
 
 ## What is this
@@ -45,7 +52,7 @@ $ git clone [qemu-hda repo]
 ```
 
 
-## Usage
+## How to use
 
 ### Run SPP
 
@@ -123,7 +130,7 @@ $ ./bin/sppsh 0
 $ ./bin/sppsh -a user1 spp0  
 ```
 
-## How to use
+## Detailed usage
 
 ### Prepare VM image
 
@@ -163,6 +170,7 @@ Basically, you don't need to edit without change core assignment.
   
   primary:
     coremask: 0x03  # 2 cores
+    portmask: "0x03"  # 2 ports
   
   secondaries:
     - id: 1
@@ -205,6 +213,7 @@ entity as following.
 #### SPP primary 
 
   - coremask: CPU cores SPP primary uses
+  - portmask: Mask for PHY ports
 
 You must avoid to overlap with secondary processes.
 So, confirm not to overlap with them if you change it.
@@ -232,7 +241,7 @@ running secondary process.
   - id: VM ID respond to secondary ID running on the VM
 
 
-### Generate templates for ring and vhost VMs
+### Generate templates for VMs
 
 VMs are booted from `wakeup.py`.
 But you have to confirm that you have already prepared 
@@ -276,3 +285,117 @@ As described in SPP's documents, you have to run processes in order.
   1. seconrdaries
   1. ring VM (deprecated in DPDK 16.11 or later)
   1. vhost VM (after create socket)
+
+
+### Runscripts
+
+Runscripts are helper tools for launching SPP primary and secondaries for
+providing more simple interfaces.
+It is implemented in python and options are defined with argparse library
+which means that runscripts provide help message and options have default
+values.
+
+However, you usually do not need to use them because 'wakeup.py' runs at
+once with options defined in config.
+You use runscripts if you need to customize options for them.
+
+#### Primary
+
+SPP primary is launched from 'runscripts/primary.py'. Refer details by running
+it with '-h' option.
+Default values are referred from source code. It is defined in 'parse_args' method.
+
+```sh
+$ python runscripts/primary.py
+usage: primary.py [-h] [-d SPPDIR] [-c COREMASK] [-p PORTMASK] [-ch CTRL_HOST]
+                  [-cp CTRL_PORT] [-n NUM_RING] [-m MEM] [-mc MEM_CHAN]
+                  [-vd [VDEV [VDEV ...]]] [-vdt VDEV_TAP] [-vdv VDEV_VHOST]
+
+Launch primary process
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d SPPDIR, --sppdir SPPDIR
+                        SPP dir
+  -c COREMASK, --coremask COREMASK
+                        coremask
+  -p PORTMASK, --portmask PORTMASK
+                        portmask
+  -ch CTRL_HOST, --ctrl-host CTRL_HOST
+                        controller ipaddr
+  -cp CTRL_PORT, --ctrl-port CTRL_PORT
+                        controller port num
+  -n NUM_RING, --num-ring NUM_RING
+                        The number of rings
+  -m MEM, --mem MEM
+                        memory size
+  -mc MEM_CHAN, --mem-chan MEM_CHAN
+                        The number of memory channels
+  -vd [VDEV [VDEV ...]], --vdev [VDEV [VDEV ...]]
+                        vdev options, separate with space if two or more
+  -vdt VDEV_TAP, --vdev-tap VDEV_TAP
+                        TUN/TAP vdev IDs, assing '1-3' or '1,2,3' for three
+                        IDs
+  -vdv VDEV_VHOST, --vdev-vhost VDEV_VHOST
+                        vhost vdev IDs, assing '1-3' or '1,2,3' for three IDs
+```
+
+It requires location of SPP with '-d' option.
+
+'vdev' is an option of DPDK for assigning virtual device such as vhost,
+TUN/TAP or crypt.
+You can use the same format as DPDK with '-vd' or '--vdev'. However, if you
+assign several devices, you do not use several '--vdev' entry but use one entry
+and separate them with whitespaces. Here is an example for TUN/TAP tdevices.
+
+```sh
+$ python runscripts/primary.py -c 0x03 ... --vdev 'net_tap0,iface=foo0' 'net_tap1,iface=foo1' ...
+```
+
+'-vdt' and '-vdv' are dedicated options for these devices. You can assign them
+more simple options. For example, you assign two of vhost by which sock1
+and sock3 are created in /tmp directory.
+
+```sh
+$ python runscripts/primary.py -c 0x03 ... -vdv 1,3
+```
+
+Please refer 
+[Network Interface Controller Drivers](http://dpdk.org/doc/guides/nics/index.html)
+for details of virtual devices.
+
+#### Secondary
+It is more simple than primary's runscript.
+
+```sh
+$ python runscripts/secondaries.py -h
+usage: secondaries.py [-h] [-i ID] [-n NUM] [-d SPPDIR] [-nm NUM_MEMCHAN]
+                      [-ch CTR_HOST] [-cp CTR_PORT]
+
+Start up spp secondaries
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i ID, --id ID        Secondary id
+  -n NUM, --num NUM     Number of SPP secondaries
+  -d SPPDIR, --sppdir SPPDIR
+                        SPP's working dir
+  -nm NUM_MEMCHAN, --num-memchan NUM_MEMCHAN
+                        Number of memory channels
+  -ch CTR_HOST, --ctr-host CTR_HOST
+                        IP address of SPP controller
+  -cp CTR_PORT, --ctr-port CTR_PORT
+                        Port of SPP controller
+```
+
+It also requires location of SPP with '-d' option as primary.
+
+As explaining by the name 'secondaries', this script launched several
+processes with '-n' option at once. In this case, secondary ID is assgined
+by referring config.
+If you give '-i' option, launch only one process of given ID.
+
+```sh
+# Launch two secondary processes
+$ python runscripts/secondaries.py -n 2 ...
+```

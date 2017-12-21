@@ -43,8 +43,8 @@ def parse_args():
         help="The number of memory channels")
     parser.add_argument(
         "-vd", "--vdev",
-        type=str,
-        help="DPDK vdev option")
+        type=str, nargs='*',
+        help="vdev options, separate with space if two or more")
     return parser.parse_args()
 
 
@@ -65,7 +65,8 @@ def main():
     cmd += '  --huge-dir=/dev/hugepages \\\n'
     cmd += '  --proc-type=primary \\\n'
     if args.vdev:
-        cmd += '  --vdev \'%s\' \\\n' % args.vdev
+        for vd in args.vdev:
+            cmd += '  --vdev \'%s\' \\\n' % vd
     cmd += '  -- \\\n'
     cmd += '  -p %s \\\n' % args.portmask
     cmd += '  -n %d \\\n' % args.num_ring

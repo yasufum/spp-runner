@@ -46,6 +46,10 @@ def parse_args():
         action="store_true",
         help="Boot template VM")
     parser.add_argument(
+        "-p", "--portmask",
+        type=str,
+        help="Portmask")
+    parser.add_argument(
         "-ns", "--nof-sec",
         type=int, default=2,
         help="Number of SPP secondaries")
@@ -65,7 +69,92 @@ def parse_args():
         "-nw", "--nof-working",
         type=int, default=1,
         help="Number of working window")
+    parser.add_argument(
+        "-vd", "--vdev",
+        type=str, nargs='*',
+        help="vdev options, separate with space if two or more")
+    parser.add_argument(
+        "-vdt", "--vdev-tap",
+        type=str,
+        help="TUN/TAP vdev IDs, assing '1-3' or '1,2,3' for three IDs")
+    parser.add_argument(
+        "-vdv", "--vdev-vhost",
+        type=str,
+        help="vhost vdev IDs, assing '1-3' or '1,2,3' for three IDs")
     return parser.parse_args()
+
+
+def count_ports(portmask, base=16):
+    portmask_bin = bin(int(portmask, base))
+    bit_ary = portmask_bin.split("b")[1]
+    cnt = 0
+    for b in list(bit_ary):
+        cnt += int(b)
+    return cnt
+
+
+def parse_vdev_opt(opt_str):
+    """Parse IDs for vdev option
+
+    It supports two types of description of IDs.
+    1. Incremental number of a range ('1-3' or '10-20')
+    2. discreted number separated with comma ('1,2,3' or '1,5,8')
+    """
+
+    # Return "1-3" as [1,2,3]
+    if opt_str.find("-") != -1:
+        print(opt_str.find("-"))
+        print("opt_str: %s" % opt_str)
+        tmp = opt_str.split("-")
+        return range(int(tmp[0]), int(tmp[1])+1)
+
+    # Return "1,3,5" as [1,3,5]
+    elif opt_str.find(",") != -1:
+        ary = []
+        for s in opt_str.split(","):
+            ary.append(int(s))
+        return ary
+    # Return "1" as [1], or raise if invalid option
+    else:
+        import re
+        matched = re.match(r"\d+", opt_str)
+        if matched:
+            return [int(opt_str)]
+        else:
+            raise("Invalid vdev option!")
+
+
+def parse_primary_opts(args):
+    coremask = primary["coremask"]
+    res = "-d %s -c %s" % (spp_srcdir, coremask)
+
+    # Convert portmask to int for adding vdev ports
+    if args.portmask:
+        portmask = args.portmask
+    else:
+        portmask = primary["portmask"]
+    nof_ports = count_ports(primary["portmask"])
+
+    print("nof ports: %d" % nof_ports)
+    if args.vdev:
+        res += " --vdev %s" % args.vdev
+        nof_ports += 1
+    if args.vdev_tap:
+        res += " --vdev-tap %s" % args.vdev_tap
+        nof_ports += len(parse_vdev_opt(args.vdev_tap))
+    if args.vdev_vhost:
+        res += " --vdev-vhost %s" % args.vdev_vhost
+        nof_ports += len(parse_vdev_opt(args.vdev_vhost))
+    res += " -p %s" % portmask
+
+    print("nof ports: %d" % nof_ports)
+
+    if nof_ports == count_ports(portmask):
+        return res
+    else:
+        msg = "Portmask '%s!' doesn't match with the number of ports %d!" % (
+            portmask, nof_ports)
+        raise ValueError(msg)
 
 
 # return tmux windows
@@ -86,10 +175,7 @@ def setup_windows(args):
             "win_name": "pri",
             "dir": work_dir,
             "cmd": "python runscripts/primary.py",
-            "opts": "-d %s -c %s -p %s -ch %s -cp %s" % (
-                spp_srcdir, primary["coremask"], primary["portmask"],
-                ctrler["host"],
-                ctrler["pri_port"]),
+            "opts": parse_primary_opts(args),
             "enter_key": True
         }
     ]

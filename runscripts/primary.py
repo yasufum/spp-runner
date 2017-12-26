@@ -84,7 +84,7 @@ def parse_vdev_opt(opt_str):
         if matched:
             return [int(opt_str)]
         else:
-            raise("Invalid vdev option!")
+            raise(ValueError("Invalid vdev option: %s" % opt_str))
 
 
 def clean_sock_file(sock_id):

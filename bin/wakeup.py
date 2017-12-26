@@ -121,7 +121,7 @@ def parse_vdev_opt(opt_str):
         if matched:
             return [int(opt_str)]
         else:
-            raise("Invalid vdev option!")
+            raise(ValueError("Invalid vdev option: %s" % opt_str))
 
 
 def parse_primary_opts(args):
@@ -154,7 +154,7 @@ def parse_primary_opts(args):
     else:
         msg = "Portmask '%s!' doesn't match with the number of ports %d!" % (
             portmask, nof_ports)
-        raise ValueError(msg)
+        raise(ValueError(msg))
 
 
 # return tmux windows

@@ -20,23 +20,8 @@ hda_path = "%s/hda/%s" % (qemu_hda_dir, hda)
 
 # Load config
 f = open(work_dir + "/conf.yml", "r")
-y = yaml.load(f)
+conf = yaml.load(f)
 f.close
-
-# spp controller
-ctrler = y["controller"]
-
-# spp primary
-primary = y["primary"]
-
-# spp secondaries
-secondaries = y["secondaries"]
-
-# ring VM
-vms_ring = y["vms_ring"]
-
-# vhost VM
-vms_vhost = y["vms_vhost"]
 
 
 def parse_args():
@@ -124,16 +109,16 @@ def parse_vdev_opt(opt_str):
             raise(ValueError("Invalid vdev option: %s" % opt_str))
 
 
-def parse_primary_opts(args):
-    coremask = primary["coremask"]
+def parse_primary_opts(args, conf):
+    coremask = conf["primary"]["coremask"]
     res = "-d %s -c %s" % (spp_srcdir, coremask)
 
     # Convert portmask to int for adding vdev ports
     if args.portmask:
         portmask = args.portmask
     else:
-        portmask = primary["portmask"]
-    nof_ports = count_ports(primary["portmask"])
+        portmask = conf["primary"]["portmask"]
+    nof_ports = count_ports(conf["primary"]["portmask"])
 
     print("nof ports: %d" % nof_ports)
     if args.vdev:
@@ -157,8 +142,9 @@ def parse_primary_opts(args):
         raise(ValueError(msg))
 
 
-# return tmux windows
-def setup_windows(args):
+def setup_windows(args, conf):
+    """Return tmux windows"""
+
     windows = [
         # spp controller
         {
@@ -166,7 +152,8 @@ def setup_windows(args):
             "dir": spp_srcdir,
             "cmd": "python spp.py",
             "opts": "-p %s -s %s" % (
-                ctrler["pri_port"], ctrler["sec_port"]),
+                conf["controller"]["pri_port"],
+                conf["controller"]["sec_port"]),
             "enter_key": True
         },
 
@@ -175,7 +162,7 @@ def setup_windows(args):
             "win_name": "pri",
             "dir": work_dir,
             "cmd": "python runscripts/primary.py",
-            "opts": parse_primary_opts(args),
+            "opts": parse_primary_opts(args, conf),
             "enter_key": True
         }
     ]
@@ -202,7 +189,7 @@ def setup_windows(args):
         if args.nof_ring > 0:
             tmpary = []
             for i in range(0, args.nof_ring):
-                tmpary.append(str(vms_ring[i]["id"]))
+                tmpary.append(str(conf["vms_ring"][i]["id"]))
             nof_ring_str = ",".join(tmpary)
 
             windows.append({
@@ -226,7 +213,7 @@ def setup_windows(args):
         tmpary = []
         if args.nof_vhost > 0:
             for i in range(0, args.nof_vhost):
-                tmpary.append(str(vms_vhost[i]["id"]))
+                tmpary.append(str(conf["vms_vhost"][i]["id"]))
 
             for vid in tmpary:
                 remove_sock(vid)
@@ -289,7 +276,7 @@ def main():
     args = parse_args()
 
     cmd = []  # contains tmux commands
-    for w in setup_windows(args):
+    for w in setup_windows(args, conf):
         if len(cmd) == 0:
             new_sess = "tmux new-session -d -s %s -n %s -c %s" % (
                 sess_name,

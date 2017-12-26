@@ -66,8 +66,6 @@ def parse_vdev_opt(opt_str):
 
     # Return "1-3" as [1,2,3]
     if opt_str.find("-") != -1:
-        print(opt_str.find("-"))
-        print("opt_str: %s" % opt_str)
         tmp = opt_str.split("-")
         return range(int(tmp[0]), int(tmp[1])+1)
 

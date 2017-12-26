@@ -88,8 +88,6 @@ def parse_vdev_opt(opt_str):
 
     # Return "1-3" as [1,2,3]
     if opt_str.find("-") != -1:
-        print(opt_str.find("-"))
-        print("opt_str: %s" % opt_str)
         tmp = opt_str.split("-")
         return range(int(tmp[0]), int(tmp[1])+1)
 
@@ -120,7 +118,6 @@ def parse_primary_opts(args, conf):
         portmask = conf["primary"]["portmask"]
     nof_ports = count_ports(conf["primary"]["portmask"])
 
-    print("nof ports: %d" % nof_ports)
     if args.vdev:
         res += " --vdev %s" % args.vdev
         nof_ports += 1
@@ -131,8 +128,6 @@ def parse_primary_opts(args, conf):
         res += " --vdev-vhost %s" % args.vdev_vhost
         nof_ports += len(parse_vdev_opt(args.vdev_vhost))
     res += " -p %s" % portmask
-
-    print("nof ports: %d" % nof_ports)
 
     if nof_ports == count_ports(portmask):
         return res
